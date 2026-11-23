@@ -112,3 +112,8 @@ scripts/servidor-local.ps1        servidor estático local para testes
   (as RPCs são a API; as de admin checam `admins` internamente).
 
 Dados reais (Excel, CSV) **nunca** entram no repositório (`.gitignore`).
+
+### Publicar uma alteração no front
+O GitHub Pages manda o navegador guardar os arquivos por 10 minutos. Ao mudar qualquer JS, troque a
+versão `?v=AAAAMMDDx` nos `import` de `assets/js/*.js` e no `<script type="module">` de cada HTML
+(é o mesmo valor em todos os lugares), para todo mundo receber a versão nova na hora.

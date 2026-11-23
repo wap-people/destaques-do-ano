@@ -3,7 +3,7 @@ import {
   criarCliente, rpc, h, $, limpar, icone, toast, confirmar, carregando,
   cpfValido, mascaraCpf, mascaraData, dataBrParaIso, soDigitos,
   fmtDataHora, nomeBonito, iniciais, chave, CORES_CATEGORIA,
-} from './comum.js';
+} from './comum.js?v=20261123c';
 
 const REGRAS = 'A votação é exclusiva para colaboradores efetivos admitidos até 30/11/2026. ' +
   'Colaboradores temporários ou terceiros não podem participar. Cada colaborador pode escolher até três pessoas ' +
