@@ -72,7 +72,8 @@ begin
       when nome is null then 'Sem nome'
       when nasc is null then 'Data de nascimento inválida'
       when adm is null then 'Data de admissão inválida'
-    end;
+    end
+  where true;   -- o Supabase (pg_safeupdate) recusa UPDATE sem WHERE
 
   update _imp i set motivo_ignorado = 'CPF repetido na planilha'
   from (select linha, row_number() over (partition by cpf order by linha) rn
@@ -97,7 +98,7 @@ begin
   where motivo_ignorado is null;
 
   -- O CPF em texto não é mais necessário.
-  update _imp set cpf = null;
+  update _imp set cpf = null where true;
 
   update _imp i set acao = case
       when i.desligado then 'desligado_planilha'
@@ -209,7 +210,7 @@ begin
   from pessoas p
   where interno.cpf_valido(h.cpf)
     and p.cpf_hash = encode(hmac(convert_to(h.cpf, 'UTF8'), convert_to(pep, 'UTF8'), 'sha256'), 'hex');
-  update _hipo set cpf = null;
+  update _hipo set cpf = null where true;
 
   -- 2) por matrícula (só se for única entre os ativos)
   update _hipo h set pessoa_id = m.id
