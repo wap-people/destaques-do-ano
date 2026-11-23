@@ -1,0 +1,30 @@
+# Dados pessoais NUNCA entram no repositório
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+*.ods
+dados/
+backup/
+*.dump
+*.sql.gz
+
+# Segredos
+.env
+.env.*
+supabase/.temp/
+supabase/.branches/
+**/service_role*
+k6/*.local.json
+k6/*.local.sql
+*.local.*
+
+# Configuração local do Claude / testes com mock
+.claude/
+
+# Ferramentas
+node_modules/
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*

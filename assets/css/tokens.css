@@ -1,0 +1,129 @@
+/* =====================================================================
+   Tokens do Design System "WAP Group" (Manual da Marca WAP WAAW V2)
+   Cores do símbolo, sempre nesta ordem: azul-petróleo, cereja, amarelo, verde.
+   Os valores base vêm do vetor oficial (simbolo-barras.svg). As variações
+   -700/-100 foram derivadas para contraste (o DS não traz tokens prontos
+   de espaçamento, raio e sombra; foram definidos aqui).
+   ===================================================================== */
+:root {
+  /* Marca */
+  --marca-branco: #ffffff;
+  --marca-preto: #1a1a1a;
+  --marca-cinza: #97999b;           /* nunca em texto corrido */
+  --marca-azul-petroleo: #0094a1;
+  --marca-azul-petroleo-700: #006a74;
+  --marca-azul-petroleo-100: #d9f1f3;
+  --marca-cereja: #cb2a44;
+  --marca-cereja-700: #a01f34;
+  --marca-cereja-100: #f8dde2;
+  --marca-amarelo: #f8ad0e;
+  --marca-amarelo-100: #fef0cf;
+  --marca-verde: #79b446;
+  --marca-verde-700: #4f7a2b;
+  --marca-verde-100: #e6f1dc;
+
+  /* Cinzas (passos de 10%) */
+  --cinza-900: #1a1a1a; --cinza-800: #333333; --cinza-700: #4d4d4d;
+  --cinza-600: #666666; --cinza-500: #808080; --cinza-400: #999999;
+  --cinza-300: #b3b3b3; --cinza-200: #cccccc; --cinza-100: #e6e6e6;
+
+  /* Interface - tema claro */
+  --surface: #ffffff;
+  --surface-alt: #f4f5f5;
+  --surface-raised: #ffffff;
+  --ink: #1a1a1a;
+  --ink-muted: #4d4d4d;
+  --border: rgba(26, 26, 26, .12);
+  --border-strong: rgba(26, 26, 26, .28);
+  --accent: var(--marca-azul-petroleo-700);   /* texto branco AA */
+  --accent-soft: var(--marca-azul-petroleo-100);
+  --on-accent: #ffffff;
+  --highlight: var(--marca-amarelo);
+  --focus: var(--marca-azul-petroleo);
+  --danger: var(--marca-cereja-700);
+  --danger-soft: var(--marca-cereja-100);
+  --success: var(--marca-verde-700);
+  --success-soft: var(--marca-verde-100);
+  --warning-soft: var(--marca-amarelo-100);
+
+  /* Tipografia: Inter (fonte corporativa) */
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --fs-display: clamp(2rem, 5vw + .5rem, 3.25rem);
+  --fs-h1: clamp(1.6rem, 3vw + .5rem, 2.25rem);
+  --fs-h2: 1.35rem;
+  --fs-h3: 1.1rem;
+  --fs-body: 1rem;
+  --fs-small: .875rem;
+  --fs-label: .75rem;
+  --fw-light: 300; --fw-regular: 400; --fw-medium: 500; --fw-semibold: 600; --fw-bold: 700;
+  --lh: 1.5;
+
+  /* Espaço, raio, sombra */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+  --radius-sm: 10px; --radius-md: 16px; --radius-lg: 24px; --radius-xl: 28px; --radius-pill: 999px;
+  --shadow-glass: 0 20px 50px -12px rgba(16, 24, 32, .22), 0 4px 14px -4px rgba(16, 24, 32, .10);
+  --shadow-float: 0 10px 30px -8px rgba(16, 24, 32, .28);
+
+  /* Movimento */
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --dur: 260ms;
+
+  /* Liquid Glass */
+  --glass-bg: color-mix(in srgb, var(--surface) 62%, transparent);
+  --glass-bg-strong: color-mix(in srgb, var(--surface) 84%, transparent);
+  --glass-border: rgba(255, 255, 255, .55);
+  --glass-spec: inset 0 1px 0 rgba(255, 255, 255, .7);
+  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 42%);
+  --glass-blur: blur(24px) saturate(180%);
+  --bg-base: #eef2f3;
+  --blob-opacity: .55;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface: #1d1f21;
+    --surface-alt: #26292b;
+    --surface-raised: #2b2e31;
+    --ink: #f2f2f2;
+    --ink-muted: #c2c2c2;
+    --border: rgba(255, 255, 255, .14);
+    --border-strong: rgba(255, 255, 255, .32);
+    --accent: #3cc3ce;
+    --accent-soft: rgba(0, 148, 161, .22);
+    --on-accent: #0d1415;
+    --focus: var(--marca-amarelo);
+    --danger: #ff7d90;
+    --danger-soft: rgba(203, 42, 68, .22);
+    --success: #a9d97f;
+    --success-soft: rgba(121, 180, 70, .2);
+    --warning-soft: rgba(248, 173, 14, .18);
+    --glass-bg: color-mix(in srgb, #1a1a1a 58%, transparent);
+    --glass-bg-strong: color-mix(in srgb, #1a1a1a 82%, transparent);
+    --glass-border: rgba(255, 255, 255, .16);
+    --glass-spec: inset 0 1px 0 rgba(255, 255, 255, .14);
+    --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, 0) 40%);
+    --shadow-glass: 0 20px 50px -12px rgba(0, 0, 0, .6);
+    --bg-base: #121314;
+    --blob-opacity: .38;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --surface: #1d1f21; --surface-alt: #26292b; --surface-raised: #2b2e31;
+  --ink: #f2f2f2; --ink-muted: #c2c2c2;
+  --border: rgba(255, 255, 255, .14); --border-strong: rgba(255, 255, 255, .32);
+  --accent: #3cc3ce; --accent-soft: rgba(0, 148, 161, .22); --on-accent: #0d1415;
+  --focus: var(--marca-amarelo);
+  --danger: #ff7d90; --danger-soft: rgba(203, 42, 68, .22);
+  --success: #a9d97f; --success-soft: rgba(121, 180, 70, .2); --warning-soft: rgba(248, 173, 14, .18);
+  --glass-bg: color-mix(in srgb, #1a1a1a 58%, transparent);
+  --glass-bg-strong: color-mix(in srgb, #1a1a1a 82%, transparent);
+  --glass-border: rgba(255, 255, 255, .16);
+  --glass-spec: inset 0 1px 0 rgba(255, 255, 255, .14);
+  --glass-sheen: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, 0) 40%);
+  --shadow-glass: 0 20px 50px -12px rgba(0, 0, 0, .6);
+  --bg-base: #121314; --blob-opacity: .38;
+  color-scheme: dark;
+}

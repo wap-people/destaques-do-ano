@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdn.sheetjs.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin · Destaques do Ano 2026</title>
+  <link rel="icon" href="assets/img/simbolo-barras.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="assets/css/tokens.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"
+          integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o"
+          crossorigin="anonymous" defer></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
+          integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT"
+          crossorigin="anonymous" defer></script>
+  <script type="module" src="assets/js/admin.js"></script>
+</head>
+<body>
+  <div class="bg" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+  <header class="topbar glass">
+    <img class="logo logo-light" src="assets/img/wap-waaw-positivo.svg" alt="WAP WAAW" width="146" height="30">
+    <img class="logo logo-dark" src="assets/img/wap-waaw-negativo.svg" alt="WAP WAAW" width="146" height="30">
+    <div class="row" id="topo-acoes"><a class="btn btn-ghost btn-sm" href="resultado.html">Resultado</a></div>
+  </header>
+  <main class="wrap wrap-wide" id="app">
+    <section class="glass panel"><p class="muted">Carregando…</p></section>
+  </main>
+</body>
+</html>
