@@ -22,6 +22,11 @@
   --marca-verde-700: #4f7a2b;
   --marca-verde-100: #e6f1dc;
 
+  /* Cores das categorias e dos "blobs" do fundo (o tema Freso sobrescreve) */
+  --cat-1: var(--marca-azul-petroleo); --cat-2: var(--marca-cereja); --cat-3: var(--marca-amarelo);
+  --cat-4: var(--marca-verde); --cat-5: var(--marca-azul-petroleo-700);
+  --blob-1: var(--marca-azul-petroleo); --blob-2: var(--marca-cereja); --blob-3: var(--marca-amarelo); --blob-4: var(--marca-verde);
+
   /* Cinzas (passos de 10%) */
   --cinza-900: #1a1a1a; --cinza-800: #333333; --cinza-700: #4d4d4d;
   --cinza-600: #666666; --cinza-500: #808080; --cinza-400: #999999;

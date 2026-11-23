@@ -1,0 +1,47 @@
+/* =====================================================================
+   Tema Freso (Manual da Marca Freso, novo logo 2026)
+   Azul Freso #1F39F9 · Cereja #C00033 · Cinza claro #F6F6F6
+   Tipografia do manual: Poppins (Google Fonts). AllRoundGothic é exclusiva do logotipo.
+   Carregar DEPOIS de tokens.css.
+   ===================================================================== */
+:root {
+  --freso-azul: #1f39f9;
+  --freso-azul-700: #1428c4;
+  --freso-azul-100: #e3e7ff;
+  --freso-cereja: #c00033;
+  --freso-cereja-100: #fbdde4;
+  --freso-cinza: #f6f6f6;
+
+  --font: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+  --accent: var(--freso-azul);            /* branco sobre #1F39F9 = 7:1 (AA) */
+  --accent-soft: var(--freso-azul-100);
+  --on-accent: #ffffff;
+  --focus: var(--freso-azul);
+  --highlight: var(--freso-cereja);
+  --danger: var(--freso-cereja);
+  --danger-soft: var(--freso-cereja-100);
+
+  --cat-1: var(--freso-azul); --cat-2: var(--freso-cereja); --cat-3: #6f80ff;
+  --cat-4: #ff6b8a; --cat-5: var(--freso-azul-700);
+  --blob-1: var(--freso-azul); --blob-2: var(--freso-cereja); --blob-3: #8f9cff; --blob-4: #5a6dff;
+  --bg-base: #eff1fb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --accent: #8d9bff; --accent-soft: rgba(31, 57, 249, .28); --on-accent: #0b0f2e;
+    --focus: #b3bcff; --danger: #ff7d97; --danger-soft: rgba(192, 0, 51, .25);
+    --bg-base: #0e1024;
+  }
+}
+:root[data-theme="dark"] {
+  --accent: #8d9bff; --accent-soft: rgba(31, 57, 249, .28); --on-accent: #0b0f2e;
+  --focus: #b3bcff; --danger: #ff7d97; --danger-soft: rgba(192, 0, 51, .25);
+  --bg-base: #0e1024;
+}
+
+/* Logo Freso é mais alto que o da WAP */
+.topbar .logo.freso { height: 34px; }
+h1, .display { letter-spacing: -.02em; }
+.display { font-weight: 600; }

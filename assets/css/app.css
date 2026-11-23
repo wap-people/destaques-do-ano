@@ -33,18 +33,18 @@ a { color: var(--accent); }
 .bg {
   position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
   background:
-    radial-gradient(1200px 800px at 10% -10%, color-mix(in srgb, var(--marca-azul-petroleo) 18%, transparent), transparent 60%),
-    radial-gradient(900px 700px at 110% 110%, color-mix(in srgb, var(--marca-verde) 16%, transparent), transparent 60%),
+    radial-gradient(1200px 800px at 10% -10%, color-mix(in srgb, var(--blob-1) 18%, transparent), transparent 60%),
+    radial-gradient(900px 700px at 110% 110%, color-mix(in srgb, var(--blob-4) 16%, transparent), transparent 60%),
     var(--bg-base);
 }
 .bg span {
   position: absolute; border-radius: 50%; filter: blur(60px); opacity: var(--blob-opacity);
   animation: flutuar 26s var(--ease) infinite alternate;
 }
-.bg span:nth-child(1) { width: 46vmax; height: 46vmax; left: -12vmax; top: -10vmax; background: var(--marca-azul-petroleo); }
-.bg span:nth-child(2) { width: 34vmax; height: 34vmax; right: -8vmax; top: 18vh; background: var(--marca-cereja); animation-duration: 32s; opacity: calc(var(--blob-opacity) * .6); }
-.bg span:nth-child(3) { width: 30vmax; height: 30vmax; left: 20vw; bottom: -14vmax; background: var(--marca-amarelo); animation-duration: 29s; opacity: calc(var(--blob-opacity) * .7); }
-.bg span:nth-child(4) { width: 28vmax; height: 28vmax; right: 10vw; bottom: -10vmax; background: var(--marca-verde); animation-duration: 35s; }
+.bg span:nth-child(1) { width: 46vmax; height: 46vmax; left: -12vmax; top: -10vmax; background: var(--blob-1); }
+.bg span:nth-child(2) { width: 34vmax; height: 34vmax; right: -8vmax; top: 18vh; background: var(--blob-2); animation-duration: 32s; opacity: calc(var(--blob-opacity) * .6); }
+.bg span:nth-child(3) { width: 30vmax; height: 30vmax; left: 20vw; bottom: -14vmax; background: var(--blob-3); animation-duration: 29s; opacity: calc(var(--blob-opacity) * .7); }
+.bg span:nth-child(4) { width: 28vmax; height: 28vmax; right: 10vw; bottom: -10vmax; background: var(--blob-4); animation-duration: 35s; }
 @keyframes flutuar {
   from { transform: translate3d(0, 0, 0) scale(1); }
   to   { transform: translate3d(4vmax, 3vmax, 0) scale(1.12); }

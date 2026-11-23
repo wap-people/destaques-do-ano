@@ -1,5 +1,5 @@
 // Painel de apuração (comissão). Polling de 30 s, sem Realtime.
-import { criarCliente, rpc, h, $, limpar, icone, toast, fmtDataHora, fmtData, fmtNum, nomeBonito, baixarArquivo, csv, carregando } from './comum.js';
+import { criarCliente, rpc, h, $, limpar, icone, toast, fmtDataHora, fmtData, fmtNum, nomeBonito, baixarArquivo, csv, carregando, EMPRESAS } from './comum.js';
 import { exigirLogin, botaoSair } from './auth.js';
 
 const app = $('#app');
@@ -9,6 +9,21 @@ let dados = null;
 let filtroCat = '';
 let filtroUni = '';
 let timer = null;
+let empresa = (() => { try { return sessionStorage.getItem('destaques-admin-empresa') || 'WAP'; } catch { return 'WAP'; } })();
+const nomeEmpresa = () => (EMPRESAS.find((e) => e.codigo === empresa) || {}).nome || empresa;
+
+function seletorEmpresa() {
+  return h('div', { class: 'tabs glass no-print', role: 'tablist', 'aria-label': 'Empresa' },
+    ...EMPRESAS.map((e) => h('button', {
+      role: 'tab', type: 'button', 'aria-selected': e.codigo === empresa ? 'true' : 'false',
+      onclick: async () => {
+        if (e.codigo === empresa) return;
+        empresa = e.codigo; filtroCat = ''; filtroUni = '';
+        try { sessionStorage.setItem('destaques-admin-empresa', empresa); } catch { /* nada */ }
+        await atualizar();
+      },
+    }, e.nome)));
+}
 
 function kpi(rot, valor, sub) {
   return h('div', { class: 'kpi' }, h('div', { class: 'label' }, rot), h('div', { class: 'v' }, valor), sub ? h('div', { class: 'muted small' }, sub) : null);
@@ -55,9 +70,10 @@ function render() {
     h('option', { value: '' }, 'Todas as unidades'), ...unis.map((u) => h('option', { value: u, selected: u === filtroUni }, u === 'GERAL' ? 'Geral (Ouro e HiPo)' : u)));
 
   limpar(app).append(
+    seletorEmpresa(),
     h('section', { class: 'glass panel stack' },
       h('div', { class: 'row' },
-        h('div', { class: 'titulo-barras' }, h('img', { class: 'barras', src: 'assets/img/simbolo-barras.svg', alt: '', width: 40, height: 22 }), h('h1', {}, 'Apuração')),
+        h('div', { class: 'titulo-barras' }, h('img', { class: 'barras', src: empresa === 'FRESO' ? 'assets/img/freso-simbolo.png' : 'assets/img/simbolo-barras.svg', alt: '', width: 40, height: 22 }), h('h1', {}, `Apuração · ${nomeEmpresa()}`)),
         h('span', { class: 'spacer' }),
         h('span', { class: 'muted small', 'aria-live': 'polite' }, `Atualizado ${fmtDataHora(dados.gerado_em)} · atualiza a cada 30 s`)),
       h('div', { class: 'kpis' },
@@ -94,14 +110,14 @@ function linhasCsv(d) {
 }
 
 function exportarCsv() {
-  const nome = `apuracao-destaques-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.csv`;
+  const nome = `apuracao-destaques-${empresa.toLowerCase()}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.csv`;
   baixarArquivo(nome, csv(linhasCsv(dados)));
 }
 
 async function gerarAta(btn) {
   carregando(btn, true);
   try {
-    const ata = await rpc(cliente, 'exportar_ata');
+    const ata = await rpc(cliente, 'exportar_ata', { p_empresa: empresa });
     pararPolling();
     const e = ata.eleicao;
     const vencedores = ata.grupos.map((g) => h('tr', {},
@@ -114,8 +130,10 @@ async function gerarAta(btn) {
         h('button', { class: 'btn', type: 'button', onclick: () => window.print() }, 'Imprimir / salvar PDF'),
         h('button', { class: 'btn btn-ghost', type: 'button', onclick: () => { render(); iniciarPolling(); } }, 'Voltar ao painel')),
       h('section', { class: 'glass panel stack' },
-        h('img', { src: 'assets/img/wap-waaw-positivo.svg', alt: 'WAP WAAW', width: 180, height: 37 }),
-        h('h1', {}, `Ata de apuração · ${e.nome_eleicao}`),
+        empresa === 'FRESO'
+          ? h('img', { src: 'assets/img/freso-azul.png', alt: 'Freso', width: 160, height: 41 })
+          : h('img', { src: 'assets/img/wap-waaw-positivo.svg', alt: 'WAP WAAW', width: 180, height: 37 }),
+        h('h1', {}, `Ata de apuração · ${ata.empresa_nome} · ${e.nome_eleicao}`),
         h('p', {}, `Período: ${fmtDataHora(e.inicio)} a ${fmtDataHora(e.fim)} · Status: ${e.status}`),
         h('p', {}, `Gerada em ${ata.gerado_em_local} por ${ata.gerado_por || '—'}.`),
         h('p', {}, `Cédulas: ${fmtNum(ata.cedulas)} · Indicações: ${fmtNum(ata.total_votos)} · Participação: ${ata.participacao_geral.percentual ?? 0}% (${fmtNum(ata.participacao_geral.votaram)} de ${fmtNum(ata.participacao_geral.elegiveis)}) · Conferência: ${ata.sanidade_ok ? 'OK' : 'ERRO'}`),
@@ -136,7 +154,7 @@ async function gerarAta(btn) {
 }
 
 async function atualizar() {
-  try { dados = await rpc(cliente, 'apurar'); render(); }
+  try { dados = await rpc(cliente, 'apurar', { p_empresa: empresa }); render(); }
   catch (e) { toast('Não foi possível atualizar: ' + e.message, 5000); }
 }
 function iniciarPolling() { pararPolling(); timer = setInterval(() => { if (!document.hidden) atualizar(); }, INTERVALO); }

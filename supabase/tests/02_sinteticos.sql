@@ -27,9 +27,9 @@ delete from public.votos where true;
 delete from public.sessoes_voto where true;
 delete from public.pessoas where true;
 
-insert into public.pessoas (cpf_hash, nasc_hash, nome, matricula, cargo, setor, unidade_original, unidade,
+insert into public.pessoas (empresa, cpf_hash, nasc_hash, nome, matricula, cargo, setor, unidade_original, unidade,
                             data_admissao, vinculo, elegivel, motivo_inelegivel, high_potential)
-select interno.hmac(c.cpf),
+select 'WAP', interno.hmac(c.cpf),
        interno.hmac(c.cpf || '|' || to_char(c.nasc, 'YYYY-MM-DD')),
        (array['ANA','BRUNO','CARLA','DIEGO','EVA','FABIO','GABRIELA','HUGO','ISABELA','JOAO','KAREN','LUCAS','MARINA','NELSON','OLIVIA','PAULO','RAFAEL','SOFIA','TIAGO','VITOR'])[1 + i % 20]
          || ' SINT ' || (array['SILVA','SOUZA','LIMA','COSTA','GOMES','ALMEIDA','ROCHA','MARTINS','DIAS','RIBEIRO','ARAUJO'])[1 + (i / 20) % 11]
@@ -37,7 +37,7 @@ select interno.hmac(c.cpf),
        (20000 + i)::text,
        case when i % 40 = 0 then 'JOVEM APRENDIZ' else 'ANALISTA' end,
        (array['Produção','Qualidade','Logística','TI','Vendas','Marketing','Financeiro','People','P&D','Suprimentos'])[1 + i % 10],
-       u.orig, interno.normalizar_unidade(u.orig),
+       u.orig, interno.normalizar_unidade(u.orig, 'WAP'),
        c.adm,
        case when i % 40 = 0 then 'Aprendiz' else 'Efetivo (CLT)' end,
        i % 40 <> 0,
@@ -56,6 +56,21 @@ cross join lateral (select case
     when i % 20 = 18 then 'WAP 103 - FORTALEZA'
     else 'HOME OFFICE' end orig) u;
 
-select unidade, count(*) total, count(*) filter (where elegivel) elegiveis,
+-- Freso: 120 pessoas sintéticas (i = 2001..2120, mesma fórmula de CPF e nascimento)
+insert into public.pessoas (empresa, cpf_hash, nasc_hash, nome, matricula, cargo, setor, unidade_original, unidade,
+                            data_admissao, vinculo, elegivel, high_potential)
+select 'FRESO', interno.hmac(c.cpf), interno.hmac(c.cpf || '|' || to_char(c.nasc, 'YYYY-MM-DD')),
+       (array['BEATRIZ','CAIO','DANIELA','ENZO','FLAVIA','GUSTAVO','HELENA','IGOR','JULIA','KAUA'])[1 + i % 10]
+         || ' SINT FRESO ' || i,
+       (30000 + i)::text, 'ANALISTA',
+       (array['Produção','Logística','Vendas','Marketing','Financeiro'])[1 + i % 5],
+       u.orig, interno.normalizar_unidade(u.orig, 'FRESO'),
+       c.adm, 'Efetivo (CLT)', true, i % 23 = 0
+from generate_series(2001, 2120) i
+cross join lateral (select pg_temp.cpf_sint(i) cpf, date '1970-01-01' + (i * 37 % 12000) nasc,
+                           case when i % 3 = 0 then date '2026-02-01' else date '2015-06-01' end adm) c
+cross join lateral (select case when i % 3 = 0 then 'FRESO - FABRICA' when i % 3 = 1 then 'FRESO - CD' else 'HOME OFFICE' end orig) u;
+
+select empresa, unidade, count(*) total, count(*) filter (where elegivel) elegiveis,
        count(*) filter (where high_potential) hipo
-from public.pessoas group by 1 order by 1;
+from public.pessoas group by 1, 2 order by 1, 2;

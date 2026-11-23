@@ -3,7 +3,7 @@
 param([int]$Porta = 8080)
 $raiz = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $tipos = @{ '.html' = 'text/html; charset=utf-8'; '.js' = 'text/javascript; charset=utf-8'; '.mjs' = 'text/javascript; charset=utf-8';
-  '.css' = 'text/css; charset=utf-8'; '.svg' = 'image/svg+xml'; '.png' = 'image/png'; '.json' = 'application/json'; '.ico' = 'image/x-icon' }
+  '.css' = 'text/css; charset=utf-8'; '.svg' = 'image/svg+xml'; '.png' = 'image/png'; '.json' = 'application/json'; '.ico' = 'image/x-icon'; '.pdf' = 'application/pdf'; '.webp' = 'image/webp' }
 $l = New-Object System.Net.HttpListener
 $l.Prefixes.Add("http://localhost:$Porta/")
 $l.Start()

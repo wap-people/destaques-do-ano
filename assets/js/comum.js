@@ -187,4 +187,7 @@ export function csv(linhas) {
   return '﻿' + linhas.map((l) => l.map(q).join(';')).join('\r\n');
 }
 
-export const CORES_CATEGORIA = ['var(--marca-azul-petroleo)', 'var(--marca-cereja)', 'var(--marca-amarelo)', 'var(--marca-verde)', 'var(--marca-azul-petroleo-700)'];
+// Cores das categorias vêm do tema da empresa (tokens.css / tema-freso.css).
+export const CORES_CATEGORIA = ['var(--cat-1)', 'var(--cat-2)', 'var(--cat-3)', 'var(--cat-4)', 'var(--cat-5)'];
+
+export const EMPRESAS = [{ codigo: 'WAP', nome: 'WAP' }, { codigo: 'FRESO', nome: 'Freso' }];

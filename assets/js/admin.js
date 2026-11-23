@@ -1,7 +1,7 @@
 // Página de administração: importação, configuração, abertura/encerramento.
 import {
   criarCliente, rpc, h, $, limpar, icone, toast, confirmar, carregando,
-  fmtDataHora, fmtNum, nomeBonito, chave, soDigitos,
+  fmtDataHora, fmtNum, nomeBonito, chave, soDigitos, EMPRESAS,
 } from './comum.js';
 import { exigirLogin, botaoSair } from './auth.js';
 
@@ -9,6 +9,25 @@ const app = $('#app');
 const cliente = criarCliente({ comLogin: true });
 let painel = null;
 let abaAtual = 'painel';
+
+// Empresa em administração (WAP ou Freso). Admins são os mesmos para as duas.
+let empresa = (() => { try { return sessionStorage.getItem('destaques-admin-empresa') || 'WAP'; } catch { return 'WAP'; } })();
+const nomeEmpresa = () => (EMPRESAS.find((e) => e.codigo === empresa) || {}).nome || empresa;
+const rpcE = (nome, args = {}) => rpc(cliente, nome, { p_empresa: empresa, ...args });
+
+function seletorEmpresa() {
+  const status = Object.fromEntries((painel?.empresas || []).map((e) => [e.codigo, e]));
+  return h('div', { class: 'tabs glass seletor-empresa', role: 'tablist', 'aria-label': 'Empresa' },
+    ...EMPRESAS.map((e) => h('button', {
+      role: 'tab', type: 'button', 'aria-selected': e.codigo === empresa ? 'true' : 'false',
+      onclick: async () => {
+        if (e.codigo === empresa) return;
+        empresa = e.codigo;
+        try { sessionStorage.setItem('destaques-admin-empresa', empresa); } catch { /* nada */ }
+        await recarregar();
+      },
+    }, e.nome, status[e.codigo] ? h('span', { class: 'muted small' }, ` · ${ROTULO_STATUS[status[e.codigo].status]}`) : null)));
+}
 
 const CAMPOS_ATIVOS = [
   { k: 'cpf', rot: 'CPF', obrig: true, sin: ['cpf', 'id federal', 'cpf do colaborador', 'nr cpf', 'numero cpf'] },
@@ -132,19 +151,19 @@ function fluxoImportacao({ titulo, descricao, campos, rpcNome, renderPrevia }) {
       carregando(btnPrevia, true);
       limpar(previa);
       try {
-        const r = await rpc(cliente, rpcNome, { p_linhas: linhas, p_simular: true });
+        const r = await rpcE(rpcNome, { p_linhas: linhas, p_simular: true });
         previa.append(renderPrevia(r));
         const btnOk = h('button', { class: 'btn', type: 'button' }, icone('check'), 'Confirmar importação');
         btnOk.addEventListener('click', async () => {
           const extra = r.alerta_desligamentos ? ` ATENÇÃO: ${r.desligados} pessoas serão marcadas como desligadas.` : '';
-          const ok = await confirmar({ titulo: 'Confirmar importação?', texto: `Os dados serão gravados no banco.${extra}`, ok: 'Importar', perigo: !!r.alerta_desligamentos });
+          const ok = await confirmar({ titulo: `Confirmar importação na ${nomeEmpresa()}?`, texto: `A base da ${nomeEmpresa()} será atualizada.${extra}`, ok: 'Importar', perigo: !!r.alerta_desligamentos });
           if (!ok) return;
           carregando(btnOk, true);
           try {
-            await rpc(cliente, rpcNome, { p_linhas: linhas, p_simular: false });
+            await rpcE(rpcNome, { p_linhas: linhas, p_simular: false });
             toast('Importação concluída.');
             limpar(area).append(h('div', { class: 'alert alert-ok' }, h('strong', {}, 'Importação concluída'), `${file.name} foi importado.`));
-            painel = await rpc(cliente, 'painel_admin');
+            painel = await rpcE('painel_admin');
           } catch (e) {
             previa.append(h('div', { class: 'alert alert-erro' }, e.message));
             carregando(btnOk, false, 'Confirmar importação');
@@ -231,10 +250,10 @@ function abaPainel() {
       ? `A votação ficará disponível para todos os elegíveis entre ${fmtDataHora(c.inicio)} e ${fmtDataHora(c.fim)}.`
       : 'Ninguém mais conseguirá votar até que a votação seja reaberta.', ok: 'Continuar', perigo });
     if (!ok1) return;
-    const ok2 = await confirmar({ titulo: 'Confirmação final', texto: 'Esta ação afeta toda a empresa.', ok: rotulo, digitar: palavra, perigo });
+    const ok2 = await confirmar({ titulo: `Confirmação final · ${nomeEmpresa()}`, texto: `Esta ação afeta toda a ${nomeEmpresa()}.`, ok: rotulo, digitar: palavra, perigo });
     if (!ok2) return;
     carregando(b, true);
-    try { await rpc(cliente, 'alterar_status', { p_status: novo }); toast('Status atualizado.'); await recarregar(); }
+    try { await rpcE('alterar_status', { p_status: novo }); toast('Status atualizado.'); await recarregar(); }
     catch (err) { toast(err.message, 6000); carregando(b, false, rotulo); }
   } }, rotulo);
   if (c.status === 'rascunho') acoes.push(acao('Abrir votação', 'aberta', 'ABRIR', false));
@@ -243,7 +262,7 @@ function abaPainel() {
 
   return h('div', { class: 'stack' },
     h('section', { class: 'glass panel stack' },
-      h('div', { class: 'row' }, h('h2', {}, c.nome_eleicao), badge, h('span', { class: 'spacer' }), ...acoes),
+      h('div', { class: 'row' }, h('h2', {}, `${nomeEmpresa()} · ${c.nome_eleicao}`), badge, h('span', { class: 'spacer' }), ...acoes),
       h('p', { class: 'muted' }, `Período: ${fmtDataHora(c.inicio)} até ${fmtDataHora(c.fim)} · Auto-voto: ${c.permitir_auto_voto ? 'permitido' : 'proibido'}`),
       h('div', { class: 'kpis' }, kpi('Na base', painel.pessoas), kpi('Ativos', painel.ativos), kpi('Elegíveis', painel.elegiveis),
         kpi('High Potential', painel.hipo), kpi('Cédulas recebidas', painel.cedulas)),
@@ -256,11 +275,11 @@ function abaPainel() {
       h('div', { class: 'row' },
         h('button', { class: 'btn btn-ghost', type: 'button', onclick: async () => {
           if (!await confirmar({ titulo: 'Zerar votos (piloto)?', texto: 'Apaga TODOS os votos e libera todos para votar de novo. A votação volta para rascunho. Use só depois do piloto.', digitar: 'ZERAR VOTOS', ok: 'Zerar', perigo: true })) return;
-          try { const r = await rpc(cliente, 'zerar_votacao', { p_confirmacao: 'ZERAR VOTOS' }); toast(`${r.votos_apagados} votos apagados.`); await recarregar(); } catch (e) { toast(e.message, 6000); }
+          try { const r = await rpcE('zerar_votacao', { p_confirmacao: 'ZERAR VOTOS' }); toast(`${r.votos_apagados} votos apagados.`); await recarregar(); } catch (e) { toast(e.message, 6000); }
         } }, 'Zerar votos do piloto'),
         h('button', { class: 'btn btn-ghost', type: 'button', onclick: async () => {
           if (!await confirmar({ titulo: 'Anonimizar a base (LGPD)?', texto: 'Troca os hashes de CPF e nascimento por valores aleatórios. Ninguém mais conseguirá entrar. Faça antes a ata e o backup. Não pode ser desfeito.', digitar: 'ANONIMIZAR', ok: 'Anonimizar', perigo: true })) return;
-          try { const r = await rpc(cliente, 'anonimizar_base', { p_confirmacao: 'ANONIMIZAR' }); toast(`${r.pessoas_anonimizadas} registros anonimizados.`); await recarregar(); } catch (e) { toast(e.message, 6000); }
+          try { const r = await rpcE('anonimizar_base', { p_confirmacao: 'ANONIMIZAR' }); toast(`${r.pessoas_anonimizadas} registros anonimizados.`); await recarregar(); } catch (e) { toast(e.message, 6000); }
         } }, 'Anonimizar base (encerramento)'))));
 }
 
@@ -282,7 +301,7 @@ function abaConfig() {
     const p = { nome_eleicao: nome.value, inicio: ini.value + ':00-03:00', fim: fim.value + (fim.value.length === 16 ? ':59-03:00' : '-03:00'), permitir_auto_voto: auto.checked };
     if (new Date(p.fim) <= new Date(p.inicio)) { toast('O fim precisa ser depois do início.'); return; }
     carregando(btn, true);
-    try { await rpc(cliente, 'configurar', { p }); toast('Configuração salva.'); await recarregar(); }
+    try { await rpcE('configurar', { p }); toast('Configuração salva.'); await recarregar(); }
     catch (err) { toast(err.message, 6000); carregando(btn, false, 'Salvar'); }
   } },
     h('h2', {}, 'Configuração'),
@@ -314,10 +333,10 @@ function render() {
   const abas = [
     ['painel', 'Painel', abaPainel],
     ['ativos', 'Base de ativos', () => fluxoImportacao({
-      titulo: 'Importar base de ativos', campos: CAMPOS_ATIVOS, rpcNome: 'importar_ativos', renderPrevia: previaAtivos,
+      titulo: `Importar base de ativos · ${nomeEmpresa()}`, campos: CAMPOS_ATIVOS, rpcNome: 'importar_ativos', renderPrevia: previaAtivos,
       descricao: 'Envie a planilha completa de colaboradores ativos. Quem já está no banco e não vier na planilha será marcado como desligado (nada é apagado). Pode ser reimportada durante a votação.' })],
     ['hipo', 'High Potential', () => fluxoImportacao({
-      titulo: 'Importar lista High Potential 2026', campos: CAMPOS_HIPO, rpcNome: 'importar_hipo', renderPrevia: previaHipo,
+      titulo: `Importar lista High Potential 2026 · ${nomeEmpresa()}`, campos: CAMPOS_HIPO, rpcNome: 'importar_hipo', renderPrevia: previaHipo,
       descricao: 'Planilha com os participantes do programa (por CPF ou matrícula). A lista substitui a anterior.' })],
     ['config', 'Configuração', abaConfig],
     ['historico', 'Histórico', abaHistorico],
@@ -326,11 +345,11 @@ function render() {
   const nav = h('div', { class: 'tabs glass', role: 'tablist', 'aria-label': 'Seções' },
     ...abas.map(([id, rot]) => h('button', { role: 'tab', type: 'button', 'aria-selected': id === abaAtual ? 'true' : 'false', onclick: () => { abaAtual = id; render(); } }, rot)));
   conteudo.append(abas.find(([id]) => id === abaAtual)[2]());
-  limpar(app).append(nav, conteudo);
+  limpar(app).append(seletorEmpresa(), nav, conteudo);
 }
 
 async function recarregar() {
-  painel = await rpc(cliente, 'painel_admin');
+  painel = await rpcE('painel_admin');
   render();
 }
 

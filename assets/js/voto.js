@@ -8,7 +8,12 @@ import {
 const REGRAS = 'A votação é exclusiva para colaboradores efetivos admitidos até 30/11/2026. ' +
   'Colaboradores temporários ou terceiros não podem participar. Cada colaborador pode escolher até três pessoas ' +
   'em cada categoria, representando quem mais se destacou ao longo do ano. O voto é anônimo.';
-const CHAVE_SESSAO = 'destaques-cedula';
+// Cada página de votação declara a empresa em <html data-empresa="WAP|FRESO">.
+const EMPRESA = (document.documentElement.dataset.empresa || 'WAP').toUpperCase();
+const CHAVE_SESSAO = 'destaques-cedula-' + EMPRESA;
+// Caminho do símbolo da marca, relativo a este arquivo (funciona na raiz e em /freso/).
+const SIMBOLO = document.documentElement.dataset.simbolo || new URL('../img/simbolo-barras.svg', import.meta.url).href;
+const SELO = document.documentElement.dataset.selo || 'Time Legendário';
 
 const app = $('#app');
 let cliente;
@@ -46,7 +51,7 @@ function mostrar(...secoes) {
 
 function titulo(texto, nivel = 'h1') {
   return h('div', { class: 'titulo-barras' },
-    h('img', { class: 'barras', src: 'assets/img/simbolo-barras.svg', alt: '', width: 40, height: 22 }),
+    h('img', { class: 'barras', src: SIMBOLO, alt: '', width: 40, height: 22 }),
     h(nivel, { class: nivel === 'h1' ? 'display' : '' }, texto));
 }
 
@@ -62,7 +67,7 @@ function telaBoasVindas() {
     info.inicio ? `Abre em ${fmtDataHora(info.inicio)} e vai até ${fmtDataHora(info.fim)}.` : 'Aguarde o comunicado do RH.');
 
   mostrar(h('section', { class: 'glass panel fade-in stack' },
-    h('p', { class: 'label' }, 'Time Legendário'),
+    h('p', { class: 'label' }, SELO),
     titulo(info.nome_eleicao),
     h('p', {}, 'Chegou a hora de reconhecer quem fez a diferença em 2026. Escolha quem mais se destacou em cada categoria.'),
     situacao,
@@ -113,10 +118,10 @@ function telaIdentificacao(msgErro) {
     if (!ok2) return inNasc.focus();
     carregando(btn, true);
     try {
-      const r = await rpc(cliente, 'iniciar_votacao', { p_cpf: soDigitos(inCpf.value), p_nascimento: dataBrParaIso(inNasc.value) });
+      const r = await rpc(cliente, 'iniciar_votacao', { p_empresa: EMPRESA, p_cpf: soDigitos(inCpf.value), p_nascimento: dataBrParaIso(inNasc.value) });
       if (!r || !r.ok) {
         erGeral.append(h('div', { class: 'alert alert-erro' }, (r && r.mensagem) || 'Não foi possível continuar.'));
-        if (r && r.codigo === 'fechada') { info = await rpc(cliente, 'info_publica'); }
+        if (r && r.codigo === 'fechada') { info = await rpc(cliente, 'info_publica', { p_empresa: EMPRESA }); }
         return;
       }
       ced = {
@@ -357,7 +362,7 @@ function telaComprovante(protocolo) {
 async function iniciar() {
   try {
     cliente = criarCliente();
-    info = await rpc(cliente, 'info_publica');
+    info = await rpc(cliente, 'info_publica', { p_empresa: EMPRESA });
     const badge = $('#status-badge');
     badge.hidden = false;
     badge.className = 'badge ' + (info.aberta_agora ? 'badge-ok' : 'badge-aviso');
