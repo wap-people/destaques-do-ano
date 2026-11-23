@@ -2,11 +2,26 @@
 
 Sistema de votação anônima do Time Legendário: site estático no **GitHub Pages** e backend no **Supabase Free**.
 
+Atende **duas empresas do grupo: WAP e Freso**. A votação é separada (página, marca, base, HiPo,
+status e apuração próprios); admins e telas de apuração são unificados, com seletor de empresa.
+
 | Página | Acesso | Para quê |
 |---|---|---|
-| `index.html` | público | votação (CPF + data de nascimento) |
-| `resultado.html` | login (comissão) | apuração ao vivo (polling 30 s), CSV e ata |
-| `admin.html` | login (admins) | importar planilhas, configurar, abrir/encerrar |
+| `index.html` | público | votação **WAP** (DS "WAP Group") |
+| `freso/index.html` | público | votação **Freso** (azul #1F39F9, cereja #C00033, Poppins) |
+| `resultado.html` | login (comissão) | apuração ao vivo por empresa (polling 30 s), CSV e ata |
+| `admin.html` | login (admins) | por empresa: importar planilhas, configurar, abrir/encerrar |
+
+Endereços: `https://wap-people.github.io/votacao-destaques-wap/` (WAP) e `.../freso/` (Freso).
+Projetos Supabase: produção `votacao-destaques-prod` e homologação `votacao-destaques-homolog`
+(o `assets/js/config.js` aponta para a produção; a homologação está comentada no mesmo arquivo).
+
+### Multiempresa
+- Tabela `empresas` (WAP, FRESO). `config`, `pessoas`, `votos` e `importacoes` têm a coluna `empresa`.
+- O mesmo CPF pode existir nas duas empresas (cadastros independentes, `unique (empresa, cpf_hash)`).
+- `interno.candidatos()` só devolve pessoas da mesma empresa do eleitor; importar uma empresa nunca desliga ninguém da outra.
+- A regra "vira Matriz" (seção 1.2) vale só para a WAP.
+- Todas as RPCs recebem `p_empresa` (exceto `registrar_cedula`, que deduz a empresa pela sessão).
 
 Manual do RH: [MANUAL_OPERACAO.md](MANUAL_OPERACAO.md).
 

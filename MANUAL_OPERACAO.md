@@ -1,10 +1,14 @@
 # Manual de operação · Destaques do Ano 2026
 
-Guia para o RH e a comissão. Endereços (preencher após a publicação):
+Guia para o RH e a comissão. O sistema atende **WAP e Freso**, com votações separadas.
 
-- Votação: `https://<conta>.github.io/<repositorio>/`
-- Resultado (comissão): `.../resultado.html`
-- Administração: `.../admin.html`
+- Votação **WAP**: `https://wap-people.github.io/votacao-destaques-wap/`
+- Votação **Freso**: `https://wap-people.github.io/votacao-destaques-wap/freso/`
+- Resultado (comissão, as duas empresas): `https://wap-people.github.io/votacao-destaques-wap/resultado.html`
+- Administração (as duas empresas): `https://wap-people.github.io/votacao-destaques-wap/admin.html`
+
+> No admin e no resultado, escolha a empresa no seletor **WAP | Freso** no topo. Tudo o que você fizer
+> (importar, abrir, encerrar, zerar, anonimizar) vale **só para a empresa selecionada**.
 
 ---
 
