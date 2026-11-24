@@ -83,7 +83,8 @@ O front publicado é a versão `20261124a`, com o combo de efeitos Liquid Glass.
   - a Freso usa as mesmas categorias e textos;
   - a data de corte é 30/11/2026;
   - "vira Matriz" vale só para a WAP.
-- [ ] Um ou dois dias antes de 09/12, conferir se o projeto Supabase não foi pausado (o plano Free pausa após 7 dias sem uso).
+- [ ] Um ou dois dias antes de 09/12, conferir se o projeto Supabase não foi pausado (o plano Free pausa após 7 dias sem uso). O keep-alive diário (seção 4, "Automação") deve evitar a pausa; basta ver se a última execução na aba Actions ficou verde.
+- [ ] Cadastrar os segredos `SUPABASE_DB_URL` e `BACKUP_SENHA` no GitHub para ligar o backup diário (seção 4, "Automação").
 - [ ] **09/12:** abrir a votação de cada empresa pelo admin.
 - [ ] **Depois de 23/12:**
   - encerrar a votação;
@@ -138,3 +139,18 @@ Os nomes com `.local.` e a pasta `.claude/` são ignorados pelo git de propósit
 - Aplique primeiro na **homologação**, rode `supabase/tests/01_regras.sql` (precisa terminar em `TODOS_OK`) e só então aplique na produção.
 - Com a votação **aberta**, evite qualquer mudança de esquema na produção.
 - Antes de qualquer ação destrutiva (zerar, anonimizar, reimportar base), alinhe com o RH.
+
+### Automação (GitHub Actions, gratuito)
+Os dois arquivos ficam em `.github/workflows/`. Para acompanhar, abra a aba **Actions** do repositório.
+
+- **Keep-alive** (`keepalive.yml`): todo dia às 09:17 (Brasília), chama `info_publica()` na produção e na homologação, para o plano Free não pausar os projetos. Usa só a chave anon pública. Se falhar, o GitHub manda e-mail: confira no painel do Supabase se o projeto foi pausado e restaure.
+  - O GitHub desliga tarefas agendadas de repositório público depois de 60 dias sem commit. Se isso acontecer, reative na aba Actions.
+- **Backup** (`backup.yml`): `pg_dump` dos esquemas `public` e `interno` da produção, às 03:00, de 25/11 a 15/01. Também pode ser rodado à mão em Actions → Backup produção → Run workflow.
+  - O arquivo é comprimido e **criptografado** (GPG, AES-256) antes de sair do runner, e fica 14 dias como artefato da execução. O repositório é público, então nunca desligue a criptografia.
+  - Precisa de 2 segredos em Settings → Secrets and variables → Actions:
+    - `SUPABASE_DB_URL`: a string de conexão **Session pooler** da produção (Supabase → Connect), com a senha do banco;
+    - `BACKUP_SENHA`: a senha dos backups, guardada fora do GitHub.
+  - Sem esses segredos, a execução só avisa e não faz nada.
+  - **Restaurar:** baixe o artefato, rode `gpg --decrypt backup-prod-....sql.gz.gpg | gunzip > backup.sql` e aplique o `.sql` num Postgres 17.
+  - O backup não leva o *pepper* do Vault. No mesmo projeto, isso não importa, porque o Vault continua lá. Num projeto novo, os dados voltam, mas ninguém consegue votar com CPF e nascimento sem o pepper original.
+  - O backup não substitui a ata e o CSV do encerramento.

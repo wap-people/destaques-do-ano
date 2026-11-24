@@ -1,0 +1,48 @@
+# Mantém os projetos Supabase (plano Free) ativos: o Free pausa após 7 dias sem uso.
+# Chama info_publica(), a mesma consulta pública que a página de votação faz ao abrir (só leitura).
+# Usa só a URL e a chave anon, que já são públicas em assets/js/config.js. Nenhum segredo.
+name: Keep-alive Supabase
+
+on:
+  schedule:
+    - cron: '17 12 * * *'   # todo dia, 09:17 em Brasília
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - alvo: producao
+            url: https://ldevfxatmnrlgedltfrl.supabase.co
+            anon: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkZXZmeGF0bW5ybGdlZGx0ZnJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU0NjIxNjUsImV4cCI6MjExMTAzODE2NX0.xZVeaqyA6BEB7swRyiLb7ZE0O_4M_jKiyrYwY_toesc
+          - alvo: homologacao
+            url: https://zpoishwsmiijfqaevpfc.supabase.co
+            anon: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpwb2lzaHdzbWlpamZxYWV2cGZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU0NTY2NzIsImV4cCI6MjExMTAzMjY3Mn0.UkeMpgRYxzguLFKEDnckUP6_PzEiqKEOkQwWvSsLYBE
+    name: ping (${{ matrix.alvo }})
+    steps:
+      - name: Chamar info_publica
+        env:
+          URL: ${{ matrix.url }}
+          ANON: ${{ matrix.anon }}
+        run: |
+          # Até 3 tentativas: um projeto recém-acordado pode demorar a responder.
+          for i in 1 2 3; do
+            code=$(curl -s -o resp.json -w '%{http_code}' --max-time 30 \
+              -X POST "$URL/rest/v1/rpc/info_publica" \
+              -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+              -H 'Content-Type: application/json' -d '{"p_empresa":"WAP"}') || code=000
+            if [ "$code" = "200" ]; then
+              echo "OK ($code): status $(grep -o '"status":"[a-z]*"' resp.json)"
+              exit 0
+            fi
+            echo "Tentativa $i: HTTP $code"; sleep 20
+          done
+          echo "::error::Supabase (${{ matrix.alvo }}) não respondeu. Confira no painel se o projeto foi pausado e restaure."
+          exit 1

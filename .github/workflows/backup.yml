@@ -1,0 +1,74 @@
+# Backup diário da PRODUÇÃO durante a janela da votação (25/11 a 15/01).
+# O dump é comprimido e CRIPTOGRAFADO (GPG, AES-256) antes de sair do runner; nada em claro vai
+# para disco, git ou artefato. O repositório é público: sem a senha, o arquivo é ilegível.
+#
+# Segredos (Settings > Secrets and variables > Actions):
+#   SUPABASE_DB_URL  string do "Session pooler" da produção (Supabase > Connect), com a senha do banco
+#   BACKUP_SENHA     senha para abrir os backups (guarde fora do GitHub)
+# Sem os segredos, a execução só avisa e termina sem erro.
+#
+# Restaurar: baixe o artefato e rode
+#   gpg --decrypt backup-prod-AAAAMMDD-HHMM.sql.gz.gpg | gunzip > backup.sql
+# e aplique o .sql num banco Postgres 17 (ver CONTINUIDADE.md, "Backup automático").
+name: Backup produção
+
+on:
+  schedule:
+    - cron: '0 6 25-30 11 *'  # 03:00 em Brasília
+    - cron: '0 6 * 12 *'
+    - cron: '0 6 1-15 1 *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup-producao
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Conferir segredos
+        id: seg
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+          SENHA: ${{ secrets.BACKUP_SENHA }}
+        run: |
+          if [ -z "$DB" ] || [ -z "$SENHA" ]; then
+            echo "::warning::SUPABASE_DB_URL e/ou BACKUP_SENHA não cadastrados. Backup não executado."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Dump + gzip + GPG (sem arquivo em claro)
+        if: steps.seg.outputs.ok == 'true'
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+          SENHA: ${{ secrets.BACKUP_SENHA }}
+        run: |
+          set -euo pipefail
+          nome="backup-prod-$(TZ=America/Sao_Paulo date +%Y%m%d-%H%M).sql.gz.gpg"
+          mkdir -p saida
+          # pg_dump 17 (mesma versão do banco) via imagem oficial. Esquemas da aplicação: public e interno.
+          docker run --rm -e DB postgres:17-alpine \
+            sh -c 'pg_dump "$DB" --schema=public --schema=interno --no-owner --quote-all-identifiers' \
+          | gzip -9 \
+          | gpg --batch --yes --pinentry-mode loopback --passphrase-file <(printf '%s' "$SENHA") \
+                --symmetric --cipher-algo AES256 -o "saida/$nome"
+          tam=$(stat -c %s "saida/$nome")
+          if [ "$tam" -lt 2000 ]; then echo "::error::Backup muito pequeno ($tam bytes). Verifique a conexão."; exit 1; fi
+          echo "Gerado $nome ($tam bytes)"
+          echo "NOME=$nome" >> "$GITHUB_ENV"
+
+      - name: Guardar como artefato (14 dias)
+        if: steps.seg.outputs.ok == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NOME }}
+          path: saida/${{ env.NOME }}
+          retention-days: 14
+          if-no-files-found: error
