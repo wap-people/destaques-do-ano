@@ -25,7 +25,7 @@ Projetos Supabase: produção `votacao-destaques-prod` e homologação `votacao-
 - A regra "vira Matriz" (seção 1.2) vale só para a WAP.
 - Todas as RPCs recebem `p_empresa` (exceto `registrar_cedula`, que deduz a empresa pela sessão).
 
-Manual do RH: [MANUAL_OPERACAO.md](MANUAL_OPERACAO.md).
+Manual do RH: [MANUAL_OPERACAO.md](MANUAL_OPERACAO.md). Escopo, situação atual e pendências para quem continua o desenvolvimento: [CONTINUIDADE.md](CONTINUIDADE.md).
 
 ## Arquitetura
 
