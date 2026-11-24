@@ -49,6 +49,7 @@ com votações separadas (base, lista HiPo, status, período e apuração própr
 | Banco de homologação | Supabase `votacao-destaques-homolog` (ref `zpoishwsmiijfqaevpfc`), só com dados sintéticos |
 | Migrations | `supabase/migrations/` (aplicadas nas duas bases, na ordem dos nomes) |
 | Testes SQL | `supabase/tests/01_regras.sql` (aceite) e `02_sinteticos.sql` (1.100 pessoas fictícias, **só homologação**) |
+| Votação de teste (pública, fictícia) | `/teste/wap/` e `/teste/freso/`: mesmo `voto.js` com `<html data-teste>` e `assets/js/simulador-teste.js`. Não carrega o Supabase e a CSP bloqueia conexões; a sessão usa chave própria (`-TESTE`) |
 | Teste de carga | `scripts/carga.ps1` |
 | Servidor local | `scripts/servidor-local.ps1` (porta 8080) |
 
@@ -119,7 +120,7 @@ O pacote de continuidade (enviado à parte, fora do git) traz três arquivos:
 Os nomes com `.local.` e a pasta `.claude/` são ignorados pelo git de propósito.
 
 ### Publicar uma alteração no front
-1. Mudou JS ou CSS? Troque a versão `?v=AAAAMMDDx` em **todos** os lugares: os imports de `assets/js/*.js`, o `<script type="module">` e os `<link>` de CSS de cada HTML. O valor é o mesmo em todos. A versão atual é `20261124b`.
+1. Mudou JS ou CSS? Troque a versão `?v=AAAAMMDDx` em **todos** os lugares: os imports de `assets/js/*.js`, o `<script type="module">` e os `<link>` de CSS de cada HTML. O valor é o mesmo em todos. A versão atual é `20261124c`.
 2. Faça commit e push na `main`. O Pages publica em cerca de 1 minuto.
 3. Confira o site publicado (a versão nova deve carregar) nos temas claro e escuro e no celular.
 

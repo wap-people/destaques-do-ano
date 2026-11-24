@@ -3,14 +3,17 @@ import {
   criarCliente, rpc, h, $, limpar, icone, toast, confirmar, carregando,
   cpfValido, mascaraCpf, mascaraData, dataBrParaIso, soDigitos,
   fmtDataHora, nomeBonito, iniciais, chave, CORES_CATEGORIA, abasLiquidas, sairBolha,
-} from './comum.js?v=20261124b';
+} from './comum.js?v=20261124c';
 
 const REGRAS = 'A votação é exclusiva para colaboradores efetivos admitidos até 30/11/2026. ' +
   'Colaboradores temporários ou terceiros não podem participar. Cada colaborador pode escolher até três pessoas ' +
   'em cada categoria, representando quem mais se destacou ao longo do ano. O voto é anônimo.';
 // Cada página de votação declara a empresa em <html data-empresa="WAP|FRESO">.
 const EMPRESA = (document.documentElement.dataset.empresa || 'WAP').toUpperCase();
-const CHAVE_SESSAO = 'destaques-cedula-' + EMPRESA;
+// Páginas /teste/ declaram <html data-teste>: usam o simulador (simulador-teste.js) e nunca o banco.
+const TESTE = document.documentElement.hasAttribute('data-teste');
+// Chave própria no teste, para uma cédula fictícia nunca ser retomada na página real (mesma origem).
+const CHAVE_SESSAO = 'destaques-cedula-' + EMPRESA + (TESTE ? '-TESTE' : '');
 // Caminho do símbolo da marca, relativo a este arquivo (funciona na raiz e em /freso/).
 const SIMBOLO = document.documentElement.dataset.simbolo || new URL('../img/simbolo-barras.svg', import.meta.url).href;
 const SELO = document.documentElement.dataset.selo || 'Time Legendário';
@@ -349,8 +352,9 @@ async function enviar(btn, erro) {
 function telaComprovante(protocolo) {
   mostrar(h('section', { class: 'glass panel fade-in stack', 'aria-live': 'assertive' },
     h('div', { class: 'check-grande' }, icone('check')),
-    h('h1', { 'data-foco': true }, 'Voto registrado com sucesso'),
+    h('h1', { 'data-foco': true }, TESTE ? 'Teste concluído' : 'Voto registrado com sucesso'),
     h('p', {}, 'Obrigado por reconhecer quem faz a diferença. Juntos não existe impossível!'),
+    TESTE ? h('div', { class: 'alert alert-aviso' }, 'Modo teste: esta cédula não foi enviada nem contabilizada. Na votação real, esta é a tela de confirmação.') : null,
     h('div', { class: 'resumo-cat' },
       h('p', { class: 'label' }, 'Protocolo'),
       h('p', { class: 'protocolo' }, protocolo),
@@ -361,12 +365,15 @@ function telaComprovante(protocolo) {
 // ------------------------------------------------------------------ início
 async function iniciar() {
   try {
+    // Trava: a página de teste só roda com o simulador, nunca com o cliente real do Supabase.
+    if (TESTE && !window.supabase?.modoTeste) throw new Error('Simulador de teste não carregou.');
     cliente = criarCliente();
     info = await rpc(cliente, 'info_publica', { p_empresa: EMPRESA });
     const badge = $('#status-badge');
     badge.hidden = false;
-    badge.className = 'badge ' + (info.aberta_agora ? 'badge-ok' : 'badge-aviso');
-    badge.replaceChildren(h('span', { class: 'dot' }), info.aberta_agora ? 'Aberta' : (info.status === 'encerrada' ? 'Encerrada' : 'Fechada'));
+    badge.className = 'badge ' + (TESTE ? 'badge-aviso' : info.aberta_agora ? 'badge-ok' : 'badge-aviso');
+    badge.replaceChildren(h('span', { class: 'dot' }), TESTE ? 'Modo teste'
+      : info.aberta_agora ? 'Aberta' : (info.status === 'encerrada' ? 'Encerrada' : 'Fechada'));
     if (info.aberta_agora && restaurarEstado()) {
       passo >= ced.categorias.length ? telaRevisao() : telaCategoria();
     } else {

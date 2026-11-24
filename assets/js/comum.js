@@ -1,5 +1,5 @@
 // Utilitários compartilhados pelas três páginas.
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=20261124b';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=20261124c';
 
 export function criarCliente({ comLogin = false } = {}) {
   if (!window.supabase) throw new Error('Biblioteca do Supabase não carregou.');

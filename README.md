@@ -10,6 +10,7 @@ status e apuração próprios); admins e telas de apuração são unificados, co
 | `index.html` | público | página neutra de escolha (sem JS), aponta para `/wap/` e `/freso/` |
 | `wap/index.html` | público | votação **WAP** (DS "WAP Group") |
 | `freso/index.html` | público | votação **Freso** (azul #1F39F9, cereja #C00033, Poppins) |
+| `teste/wap/` e `teste/freso/` | público | votação **de teste**: mesma tela e regras, nomes fictícios, sem Supabase (simulador-teste.js, `connect-src 'none'`); nada é registrado |
 | `resultado.html` | login (comissão) | apuração ao vivo por empresa (polling 30 s), CSV e ata |
 | `admin.html` | login (admins) | por empresa: importar planilhas, configurar, abrir/encerrar |
 

@@ -154,6 +154,9 @@ textarea.input { padding: var(--sp-3) var(--sp-4); min-height: 96px; }
 .alert-ok { background: var(--success-soft); border-color: color-mix(in srgb, var(--success) 45%, transparent); }
 .alert-aviso { background: var(--warning-soft); border-color: color-mix(in srgb, var(--marca-amarelo) 60%, transparent); }
 .alert strong { display: block; margin-bottom: 2px; }
+/* Faixa fixa das páginas /teste/ (fica fora do #app, que é redesenhado) */
+.aviso-teste { padding-bottom: 0; }
+.aviso-teste .alert { font-size: var(--fs-small); }
 .badge {
   display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: var(--radius-pill);
   font-size: var(--fs-label); font-weight: var(--fw-semibold); letter-spacing: .04em; text-transform: uppercase;
