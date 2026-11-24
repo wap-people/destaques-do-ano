@@ -1,6 +1,6 @@
 // Painel de apuração (comissão). Polling de 30 s, sem Realtime.
-import { criarCliente, rpc, h, $, limpar, icone, toast, fmtDataHora, fmtData, fmtNum, nomeBonito, baixarArquivo, csv, carregando, EMPRESAS, abasLiquidas } from './comum.js?v=20261124d';
-import { exigirLogin, botaoSair } from './auth.js?v=20261124d';
+import { criarCliente, rpc, h, $, limpar, icone, toast, fmtDataHora, fmtData, fmtNum, nomeBonito, baixarArquivo, csv, carregando, EMPRESAS, abasLiquidas } from './comum.js?v=20261124e';
+import { exigirLogin, botaoSair } from './auth.js?v=20261124e';
 
 const app = $('#app');
 const cliente = criarCliente({ comLogin: true });

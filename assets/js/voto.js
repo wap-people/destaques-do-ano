@@ -4,7 +4,7 @@ import {
   cpfValido, mascaraCpf, mascaraData, dataBrParaIso, soDigitos,
   fmtDataHora, nomeBonito, iniciais, chave, CORES_CATEGORIA, abasLiquidas, sairBolha,
   animar, pulsar, confete,
-} from './comum.js?v=20261124d';
+} from './comum.js?v=20261124e';
 
 const REGRAS = 'A votação é exclusiva para colaboradores efetivos admitidos até 30/11/2026. ' +
   'Colaboradores temporários ou terceiros não podem participar. Cada colaborador pode escolher até três pessoas ' +
@@ -79,7 +79,7 @@ function telaBoasVindas() {
     h('div', { class: 'stack' },
       h('h2', {}, 'Categorias'),
       ...info.categorias.map((c, i) => h('details', { class: 'box' },
-        h('summary', {}, h('span', { class: 'cat-num', style: { background: CORES_CATEGORIA[i % 5], width: '6px', height: '1.2em', marginRight: '10px', display: 'inline-block', borderRadius: '3px' } }), c.nome),
+        h('summary', {}, h('span', { class: 'cat-marca', 'aria-hidden': 'true', style: { background: CORES_CATEGORIA[i % 5] } }), h('span', {}, c.nome)),
         h('p', { class: 'muted small' }, c.descricao)))),
     aberta ? h('div', { class: 'row row-end' },
       h('button', { class: 'btn', type: 'button', onclick: telaIdentificacao }, 'Quero votar', icone('seta'))) : null,
@@ -209,6 +209,8 @@ function telaCategoria() {
   const max = ced.max;
 
   const contador = h('span', { class: 'contador', 'aria-live': 'polite' });
+  // Vagas: um círculo por pessoa que pode ser indicada, para deixar claro que são "até N pessoas".
+  const vagas = Array.from({ length: max }, () => h('span', { class: 'vaga' }));
   const chips = h('div', { class: 'chips', 'aria-label': 'Escolhidos' });
   const lista = h('ul', { class: 'lista', role: 'list' });
   const busca = h('input', { class: 'input', type: 'search', placeholder: 'Buscar por nome ou setor', 'aria-label': 'Buscar por nome ou setor', autocomplete: 'off' });
@@ -221,8 +223,9 @@ function telaCategoria() {
   const botoes = new Map();
 
   function atualizar() {
-    contador.textContent = `${sel.length} de ${max}`;
+    contador.textContent = `${sel.length} de ${max} ${max === 1 ? 'pessoa escolhida' : 'pessoas escolhidas'}`;
     contador.classList.toggle('cheio', sel.length >= max);
+    vagas.forEach((v, i) => v.classList.toggle('ocupada', i < sel.length));
     limpar(chips).append(...sel.map((id) => h('span', { class: 'chip' }, nomeBonito(porId.get(id)?.nome),
       h('button', { type: 'button', 'aria-label': `Remover ${nomeBonito(porId.get(id)?.nome)}`, onclick: () => alternar(id) }, '×'))));
     for (const [id, b] of botoes) {
@@ -278,16 +281,17 @@ function telaCategoria() {
           h('p', { class: 'label' }, `Categoria ${passo + 1} de ${ced.categorias.length}`),
           h('h1', { 'data-foco': true }, cat.nome),
           h('p', { class: 'cat-desc' }, cat.descricao))),
-      h('div', { class: 'row' },
-        h('span', { class: 'muted small' }, cat.escopo === 'unidade'
-          ? ['Mostrando colaboradores da unidade ', h('strong', {}, ced.unidade)]
-          : (cat.codigo === 'HIPO' ? 'Participantes do programa High Potential 2026, de todas as unidades' : 'Colaboradores de todas as unidades')),
-        h('span', { class: 'spacer' }),
-        h('span', { class: 'muted small' }, 'Escolhidos: '), contador),
+      h('div', { class: 'vagas' },
+        h('p', {}, h('strong', {}, `Você pode indicar até ${max} ${max === 1 ? 'pessoa' : 'pessoas'} nesta categoria.`),
+          ' Toque nos nomes para escolher. Se preferir, pode deixar em branco.'),
+        h('div', { class: 'vagas-linha' },
+          h('span', { class: 'vagas-slots', 'aria-hidden': 'true' }, ...vagas), contador)),
+      h('p', { class: 'muted small' }, cat.escopo === 'unidade'
+        ? ['Mostrando colaboradores da unidade ', h('strong', {}, ced.unidade)]
+        : (cat.codigo === 'HIPO' ? 'Participantes do programa High Potential 2026, de todas as unidades' : 'Colaboradores de todas as unidades')),
       chips,
       candidatos.length ? h('div', { class: 'busca' }, icone('busca'), busca) : null,
-      lista,
-      h('p', { class: 'muted small' }, `Escolha até ${max} pessoas. Pode deixar em branco se preferir.`)),
+      lista),
     h('div', { class: 'barra-acoes glass' },
       h('button', { class: 'btn btn-ghost', type: 'button', disabled: passo === 0, onclick: () => irPara(passo - 1) }, icone('voltar'), 'Anterior'),
       h('span', { class: 'muted small saudacao' }, `Olá, ${ced.primeiro_nome}`),

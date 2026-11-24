@@ -188,8 +188,35 @@ textarea.input { padding: var(--sp-3) var(--sp-4); min-height: 96px; }
 .cat-head { display: flex; gap: var(--sp-3); align-items: flex-start; }
 .cat-num { flex: none; width: 6px; align-self: stretch; border-radius: 3px; }
 .cat-desc { color: var(--ink-muted); }
-.contador { font-weight: var(--fw-semibold); }
+.contador { font-size: var(--fs-small); font-weight: var(--fw-semibold); }
 .contador.cheio { color: var(--accent); }
+
+/* Aviso "até N pessoas" com uma vaga (círculo) por indicação */
+.vagas {
+  display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+  border-radius: var(--radius-md); background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.vagas p { margin: 0; }
+.vagas-linha { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+.vagas-slots { display: inline-flex; gap: 6px; }
+.vaga {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--accent) 70%, var(--ink-muted));
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.vaga.ocupada { background: var(--accent); border-color: var(--accent); transform: scale(1.08); }
+
+/* Marca colorida das categorias na tela inicial (alinhada ao centro do texto) */
+.cat-marca { flex: none; width: 6px; height: 1.2em; margin-right: 10px; border-radius: 3px; }
+details.box summary { gap: 0; }
+details.box summary::-webkit-details-marker { display: none; }
+details.box summary::after {
+  content: ''; margin-left: auto; width: 8px; height: 8px; flex: none;
+  border-right: 2px solid var(--ink-muted); border-bottom: 2px solid var(--ink-muted);
+  transform: rotate(45deg) translateY(-2px); transition: transform var(--dur) var(--ease);
+}
+details.box[open] summary::after { transform: rotate(-135deg) translateY(-2px); }
 
 .busca { position: relative; }
 .busca .input { padding-left: 44px; }

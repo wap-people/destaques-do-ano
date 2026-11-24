@@ -2,8 +2,8 @@
 import {
   criarCliente, rpc, h, $, limpar, icone, toast, confirmar, carregando,
   fmtDataHora, fmtNum, nomeBonito, chave, soDigitos, EMPRESAS, abasLiquidas,
-} from './comum.js?v=20261124d';
-import { exigirLogin, botaoSair } from './auth.js?v=20261124d';
+} from './comum.js?v=20261124e';
+import { exigirLogin, botaoSair } from './auth.js?v=20261124e';
 
 const app = $('#app');
 const cliente = criarCliente({ comLogin: true });

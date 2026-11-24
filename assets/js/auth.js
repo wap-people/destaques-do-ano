@@ -1,5 +1,5 @@
 // Login da comissão / admins (Supabase Auth, e-mail + senha).
-import { rpc, h, limpar, carregando } from './comum.js?v=20261124d';
+import { rpc, h, limpar, carregando } from './comum.js?v=20261124e';
 
 // Lê o tipo do link (convite ou recuperação) ANTES de o supabase-js limpar a URL.
 const tipoLink = (() => {
