@@ -1,5 +1,5 @@
 // Utilitários compartilhados pelas três páginas.
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=20261124c';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=20261124d';
 
 export function criarCliente({ comLogin = false } = {}) {
   if (!window.supabase) throw new Error('Biblioteca do Supabase não carregou.');
@@ -226,6 +226,61 @@ export function abasLiquidas(lista, seletor = '[aria-selected="true"], [aria-cur
   };
   queueMicrotask(iniciar);
   return lista;
+}
+
+// Respeita "reduzir movimento" também nas animações feitas por JS (o CSS já desliga as dele).
+export const reduzMovimento = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+// Animação curta via Web Animations API; não faz nada com movimento reduzido ou sem suporte.
+export function animar(el, quadros, opcoes) {
+  if (!el || reduzMovimento() || !el.animate) return null;
+  return el.animate(quadros, opcoes);
+}
+
+// Pulso de mola (contador que muda, badge do stepper).
+export const pulsar = (el) => animar(el,
+  [{ transform: 'scale(1)' }, { transform: 'scale(1.28)' }, { transform: 'scale(1)' }],
+  { duration: 380, easing: 'cubic-bezier(.34, 1.56, .64, 1)' });
+
+// Confete com as cores da marca, ~1,6 s. Um <canvas> fixo, sem clique, removido no fim.
+export function confete({ quantidade = 110, duracao = 1600 } = {}) {
+  if (reduzMovimento()) return;
+  const raiz = getComputedStyle(document.documentElement);
+  const cores = ['--cat-1', '--cat-2', '--cat-3', '--cat-4', '--accent']
+    .map((v) => raiz.getPropertyValue(v).trim()).filter(Boolean);
+  if (!cores.length) cores.push('#0094a1');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const L = window.innerWidth, A = window.innerHeight;
+  const cv = h('canvas', { class: 'confete', 'aria-hidden': 'true' });
+  cv.width = L * dpr; cv.height = A * dpr;
+  document.body.append(cv);
+  const ctx = cv.getContext('2d');
+  ctx.scale(dpr, dpr);
+  // Duas rajadas, dos cantos de baixo para o centro.
+  const ps = Array.from({ length: quantidade }, (_, i) => {
+    const esq = i % 2 === 0;
+    const ang = (esq ? -60 : -120) * Math.PI / 180 + (Math.random() - .5) * .9;
+    const vel = 9 + Math.random() * 8;
+    return {
+      x: esq ? L * .08 : L * .92, y: A * .95, vx: Math.cos(ang) * vel, vy: Math.sin(ang) * vel * 1.35,
+      r: Math.random() * Math.PI, vr: (Math.random() - .5) * .3, w: 6 + Math.random() * 6, hh: 8 + Math.random() * 8,
+      cor: cores[i % cores.length],
+    };
+  });
+  const t0 = performance.now();
+  const quadro = (t) => {
+    const p = (t - t0) / duracao;
+    ctx.clearRect(0, 0, L, A);
+    ctx.globalAlpha = p < .7 ? 1 : Math.max(0, 1 - (p - .7) / .3);
+    for (const c of ps) {
+      c.vy += .32; c.vx *= .985; c.vy *= .985; c.x += c.vx; c.y += c.vy; c.r += c.vr;
+      ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.r);
+      ctx.fillStyle = c.cor; ctx.fillRect(-c.w / 2, -c.hh / 2, c.w, c.hh * Math.abs(Math.cos(c.r * 2)) + 2);
+      ctx.restore();
+    }
+    if (p < 1) requestAnimationFrame(quadro); else cv.remove();
+  };
+  requestAnimationFrame(quadro);
 }
 
 // Bubble Reveal (saída): o elemento some por opacidade e só depois sai do DOM.

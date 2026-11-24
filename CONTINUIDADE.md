@@ -120,7 +120,7 @@ O pacote de continuidade (enviado à parte, fora do git) traz três arquivos:
 Os nomes com `.local.` e a pasta `.claude/` são ignorados pelo git de propósito.
 
 ### Publicar uma alteração no front
-1. Mudou JS ou CSS? Troque a versão `?v=AAAAMMDDx` em **todos** os lugares: os imports de `assets/js/*.js`, o `<script type="module">` e os `<link>` de CSS de cada HTML. O valor é o mesmo em todos. A versão atual é `20261124c`.
+1. Mudou JS ou CSS? Troque a versão `?v=AAAAMMDDx` em **todos** os lugares: os imports de `assets/js/*.js`, o `<script type="module">` e os `<link>` de CSS de cada HTML. O valor é o mesmo em todos. A versão atual é `20261124d`.
 2. Faça commit e push na `main`. O Pages publica em cerca de 1 minuto.
 3. Confira o site publicado (a versão nova deve carregar) nos temas claro e escuro e no celular.
 

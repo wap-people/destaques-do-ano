@@ -3,7 +3,8 @@ import {
   criarCliente, rpc, h, $, limpar, icone, toast, confirmar, carregando,
   cpfValido, mascaraCpf, mascaraData, dataBrParaIso, soDigitos,
   fmtDataHora, nomeBonito, iniciais, chave, CORES_CATEGORIA, abasLiquidas, sairBolha,
-} from './comum.js?v=20261124c';
+  animar, pulsar, confete,
+} from './comum.js?v=20261124d';
 
 const REGRAS = 'A votação é exclusiva para colaboradores efetivos admitidos até 30/11/2026. ' +
   'Colaboradores temporários ou terceiros não podem participar. Cada colaborador pode escolher até três pessoas ' +
@@ -159,14 +160,35 @@ function telaIdentificacao(msgErro) {
 }
 
 // ------------------------------------------------------------------ 3. Cédula
+// Navegação entre categorias/revisão com deslize: o painel atual sai para o lado oposto ao destino
+// (Web Animations, ~160 ms) e o novo entra pelo lado do destino (classe .entra-dir/.entra-esq).
+// Sem View Transitions de propósito: a "foto" da transição perde o desfoque do vidro.
+let direcao = 0;
+let navegando = false;
+const classePainel = () => 'glass panel fade-in stack painel-cedula' + (direcao > 0 ? ' entra-dir' : direcao < 0 ? ' entra-esq' : '');
+async function irPara(novo) {
+  if (navegando) return;
+  const dir = Math.sign(novo - passo);
+  const atual = app.querySelector('.painel-cedula');
+  navegando = true;
+  try {
+    const a = dir ? animar(atual, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-dir * 36}px)` }],
+      { duration: 160, easing: 'cubic-bezier(.4, 0, 1, 1)', fill: 'forwards' }) : null;
+    // Nunca depende da animação para navegar (aba sem quadros, animação cancelada etc.).
+    if (a) await Promise.race([a.finished.catch(() => {}), new Promise((r) => setTimeout(r, 220))]);
+    direcao = dir; passo = novo; salvarEstado();
+    passo >= ced.categorias.length ? telaRevisao() : telaCategoria();
+  } finally { direcao = 0; navegando = false; }
+}
+
 function stepper() {
   const total = ced.categorias.length;
   return abasLiquidas(h('nav', { class: 'stepper glass', 'aria-label': 'Etapas da votação' },
     ...ced.categorias.map((c, i) => h('button', {
       type: 'button', 'aria-current': i === passo ? 'step' : null,
-      onclick: () => { passo = i; salvarEstado(); telaCategoria(); },
+      onclick: () => irPara(i),
     }, c.nome, h('span', { class: 'n', 'aria-label': `${escolhas[c.codigo].length} escolhidos` }, escolhas[c.codigo].length))),
-    h('button', { type: 'button', 'aria-current': passo === total ? 'step' : null, onclick: () => { passo = total; salvarEstado(); telaRevisao(); } }, 'Revisão')));
+    h('button', { type: 'button', 'aria-current': passo === total ? 'step' : null, onclick: () => irPara(total) }, 'Revisão')));
 }
 
 function verificarExpiracao() {
@@ -218,6 +240,9 @@ function telaCategoria() {
     else sel.push(id);
     salvarEstado();
     atualizar();
+    // Micro-interação: o contador e o número da etapa pulsam a cada mudança.
+    pulsar(contador);
+    pulsar($('.stepper [aria-current="step"] .n'));
   }
   function filtrar() {
     const q = chave(busca.value);
@@ -246,7 +271,7 @@ function telaCategoria() {
   const ultimo = passo === ced.categorias.length - 1;
   mostrar(
     stepper(),
-    h('section', { class: 'glass panel fade-in stack' },
+    h('section', { class: classePainel() },
       h('div', { class: 'cat-head' },
         h('span', { class: 'cat-num', style: { background: cor } }),
         h('div', {},
@@ -264,9 +289,9 @@ function telaCategoria() {
       lista,
       h('p', { class: 'muted small' }, `Escolha até ${max} pessoas. Pode deixar em branco se preferir.`)),
     h('div', { class: 'barra-acoes glass' },
-      h('button', { class: 'btn btn-ghost', type: 'button', disabled: passo === 0, onclick: () => { passo--; salvarEstado(); telaCategoria(); } }, icone('voltar'), 'Anterior'),
+      h('button', { class: 'btn btn-ghost', type: 'button', disabled: passo === 0, onclick: () => irPara(passo - 1) }, icone('voltar'), 'Anterior'),
       h('span', { class: 'muted small saudacao' }, `Olá, ${ced.primeiro_nome}`),
-      h('button', { class: 'btn', type: 'button', onclick: () => { passo++; salvarEstado(); ultimo ? telaRevisao() : telaCategoria(); } },
+      h('button', { class: 'btn', type: 'button', onclick: () => irPara(passo + 1) },
         ultimo ? 'Revisar' : 'Próxima', icone('seta'))),
   );
   atualizar();
@@ -299,20 +324,20 @@ function telaRevisao() {
 
   mostrar(
     stepper(),
-    h('section', { class: 'glass panel fade-in stack' },
+    h('section', { class: classePainel() },
       titulo('Revise seu voto'),
       h('p', { class: 'muted' }, 'Confira suas escolhas. Depois de confirmar, o voto não pode ser alterado.'),
       ...ced.categorias.map((c, i) => h('div', { class: 'resumo-cat' },
         h('div', { class: 'resumo-topo' },
           h('h3', {}, c.nome),
-          h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => { passo = i; salvarEstado(); telaCategoria(); } }, 'Alterar')),
+          h('button', { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => irPara(i) }, 'Alterar')),
         escolhas[c.codigo].length
           ? h('div', { class: 'chips' }, ...escolhas[c.codigo].map((id) => h('span', { class: 'chip' }, nomeBonito(mapa.get(id)))))
           : h('span', { class: 'badge badge-aviso' }, 'Em branco'))),
       total === 0 ? h('div', { class: 'alert alert-aviso' }, 'Escolha ao menos uma pessoa em alguma categoria para enviar.') : null,
       erro),
     h('div', { class: 'barra-acoes glass' },
-      h('button', { class: 'btn btn-ghost', type: 'button', onclick: () => { passo = ced.categorias.length - 1; salvarEstado(); telaCategoria(); } }, icone('voltar'), 'Voltar'),
+      h('button', { class: 'btn btn-ghost', type: 'button', onclick: () => irPara(ced.categorias.length - 1) }, icone('voltar'), 'Voltar'),
       btn),
   );
 }
@@ -360,6 +385,8 @@ function telaComprovante(protocolo) {
       h('p', { class: 'protocolo' }, protocolo),
       h('p', { class: 'muted small' }, 'Este código não identifica você nem suas escolhas. Ele só confirma que a cédula foi recebida.')),
     h('div', { class: 'row row-end' }, h('button', { class: 'btn btn-ghost', type: 'button', onclick: telaBoasVindas }, 'Concluir'))));
+  // Celebração depois que o painel começa a entrar.
+  setTimeout(() => confete(), 250);
 }
 
 // ------------------------------------------------------------------ início

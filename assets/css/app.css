@@ -449,6 +449,49 @@ dialog.modal::backdrop { background: rgba(10, 14, 16, .45); -webkit-backdrop-fil
   box-shadow: var(--glass-spec), 0 24px 48px -16px rgba(0, 0, 0, .38), 0 6px 16px -6px rgba(0, 0, 0, .18);
 }
 
+/* A barra de ações aparece em todas as etapas: não "re-infla" a cada troca de categoria. */
+@starting-style { .barra-acoes .btn { opacity: 1; transform: none; filter: none; } }
+
+/* 8) Seleção do candidato: o check estoura com mola e o traço se desenha.
+   A animação só dispara quando aria-pressed vira "true" (o seletor passa a valer). */
+.cand .chk svg path { stroke-dasharray: 24; stroke-dashoffset: 0; }
+.cand[aria-pressed="true"] .chk { animation: chk-pop 440ms var(--mola); }
+.cand[aria-pressed="true"] .chk svg path { animation: chk-traco 300ms 80ms var(--ease) backwards; }
+.cand[aria-pressed="true"] .ini { animation: chk-pop 440ms var(--mola); }
+@keyframes chk-pop { 0% { transform: scale(.4); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+@keyframes chk-traco { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
+
+/* 9) Troca de categoria: o painel novo entra pelo lado do destino (o antigo sai via JS em voto.js). */
+@keyframes entrar-dir { from { opacity: 0; transform: translateX(44px); } to { opacity: 1; transform: none; } }
+@keyframes entrar-esq { from { opacity: 0; transform: translateX(-44px); } to { opacity: 1; transform: none; } }
+.panel.entra-dir { animation: entrar-dir 460ms var(--mola-entrada) backwards; }
+.panel.entra-esq { animation: entrar-esq 460ms var(--mola-entrada) backwards; }
+/* Os 12 primeiros candidatos não repetem a cascata a cada troca: o deslize já basta. */
+.panel.entra-dir .lista > li > .cand, .panel.entra-esq .lista > li > .cand { animation: none; }
+
+/* 10) Confete do comprovante (canvas criado por confete() em comum.js) */
+.confete { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 60; pointer-events: none; }
+
+/* 11) Skeleton com brilho no carregamento inicial. O brilho é um ::after que só se move
+   (transform), sem repintar o bloco. */
+.esqueleto { display: grid; gap: var(--sp-3); }
+.sk {
+  position: relative; overflow: hidden; display: block; height: 14px; border-radius: 8px;
+  background: color-mix(in srgb, var(--ink) 9%, transparent);
+}
+.sk::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--surface) 55%, transparent), transparent);
+  animation: sk-brilho 1.4s ease-in-out infinite;
+}
+@keyframes sk-brilho { to { transform: translateX(100%); } }
+.sk-label { width: 28%; height: 12px; }
+.sk-titulo { width: 72%; height: 34px; border-radius: 12px; }
+.sk-linha { width: 100%; }
+.sk-linha.curta { width: 62%; }
+.sk-bloco { height: 64px; border-radius: var(--radius-md); }
+.sk-botao { width: 160px; height: 48px; border-radius: var(--radius-pill); justify-self: end; }
+
 /* ---------------------------------------------------------------- acessibilidade e fallbacks */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass, .btn-ghost, dialog.modal, .toast { background: var(--surface); }

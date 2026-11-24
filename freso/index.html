@@ -14,12 +14,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
   <link rel="stylesheet" href="../assets/css/tokens.css">
-  <link rel="stylesheet" href="../assets/css/app.css?v=20261124c">
+  <link rel="stylesheet" href="../assets/css/app.css?v=20261124d">
   <link rel="stylesheet" href="../assets/css/tema-freso.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"
           integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o"
           crossorigin="anonymous" defer></script>
-  <script type="module" src="../assets/js/voto.js?v=20261124c"></script>
+  <script type="module" src="../assets/js/voto.js?v=20261124d"></script>
 </head>
 <body>
   <div class="bg" aria-hidden="true"><div class="gotas"><span></span><span></span><span></span><span></span></div></div>
@@ -31,8 +31,17 @@
   </header>
 
   <main class="wrap" id="app" aria-live="polite">
-    <section class="glass panel" id="carregando">
-      <p class="muted">Carregando…</p>
+    <section class="glass panel" id="carregando" aria-busy="true">
+      <p class="sr-only">Carregando…</p>
+      <div class="esqueleto" aria-hidden="true">
+        <span class="sk sk-label"></span>
+        <span class="sk sk-titulo"></span>
+        <span class="sk sk-linha"></span>
+        <span class="sk sk-linha curta"></span>
+        <span class="sk sk-bloco"></span>
+        <span class="sk sk-bloco"></span>
+        <span class="sk sk-botao"></span>
+      </div>
     </section>
   </main>
 

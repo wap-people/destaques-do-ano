@@ -75,6 +75,8 @@ assets/css/app.css      Liquid Glass + fallbacks (transparência, movimento, con
                         gotas do fundo com blur CSS (paradas abaixo de 600 px)
                         movimento: Liquid Morph nas abas, Bubble Reveal nos botões,
                         Scroll Float nas barras flutuantes (comum.js: abasLiquidas, sairBolha)
+                        cédula: pop no check, pulso no contador, deslize entre categorias,
+                        confete no comprovante (comum.js: pulsar, animar, confete) e skeleton no carregamento
 assets/js/              comum, voto, auth, admin, resultado, config
 assets/img/             logos oficiais WAP WAAW e símbolo de barras
 supabase/migrations/    esquema, funções internas, RPCs, grants e carga inicial
