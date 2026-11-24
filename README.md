@@ -70,6 +70,8 @@ A regra "quem pode receber voto de quem" está num único lugar: `interno.candid
 index.html (escolha) · wap/index.html · freso/index.html · resultado.html · admin.html
 assets/css/tokens.css   tokens do DS "WAP Group" (cores do símbolo, cinzas, Inter)
 assets/css/app.css      Liquid Glass + fallbacks (transparência, movimento, contraste, sem backdrop-filter)
+                        combo de efeitos: entrada zoom+desfoque, hover de mola, varredura de luz,
+                        filtro SVG #gooey nas gotas do fundo (desligado abaixo de 600 px)
 assets/js/              comum, voto, auth, admin, resultado, config
 assets/img/             logos oficiais WAP WAAW e símbolo de barras
 supabase/migrations/    esquema, funções internas, RPCs, grants e carga inicial

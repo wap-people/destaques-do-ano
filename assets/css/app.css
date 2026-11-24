@@ -37,13 +37,25 @@ a { color: var(--accent); }
     radial-gradient(900px 700px at 110% 110%, color-mix(in srgb, var(--blob-4) 16%, transparent), transparent 60%),
     var(--bg-base);
 }
+/* Gotas: o container recebe o filtro SVG "gooey" (#gooey, oculto em cada página), que funde as
+   bordas das manchas e dá a distorção orgânica. Fica só no fundo: em cima do conteúdo o filtro
+   borraria o texto e anularia o backdrop-filter do vidro. */
+.bg .gotas { position: absolute; inset: 0; opacity: var(--blob-opacity); filter: url(#gooey) blur(10px); }
 .bg span {
-  position: absolute; border-radius: 50%; filter: blur(60px); opacity: var(--blob-opacity);
-  animation: flutuar 26s var(--ease) infinite alternate;
+  position: absolute; border-radius: 50%;
+  animation: flutuar 26s var(--ease) infinite alternate, deformar 17s ease-in-out infinite alternate;
+}
+.bg span:nth-child(even) { animation-direction: alternate, alternate-reverse; }
+/* Forma orgânica que respira; com o gooey, as bordas se fundem como líquido. */
+@keyframes deformar {
+  0%   { border-radius: 50%; }
+  33%  { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; }
+  66%  { border-radius: 61% 39% 45% 55% / 57% 62% 38% 43%; }
+  100% { border-radius: 38% 62% 54% 46% / 49% 36% 64% 51%; }
 }
 .bg span:nth-child(1) { width: 46vmax; height: 46vmax; left: -12vmax; top: -10vmax; background: var(--blob-1); }
-.bg span:nth-child(2) { width: 34vmax; height: 34vmax; right: -8vmax; top: 18vh; background: var(--blob-2); animation-duration: 32s; opacity: calc(var(--blob-opacity) * .6); }
-.bg span:nth-child(3) { width: 30vmax; height: 30vmax; left: 20vw; bottom: -14vmax; background: var(--blob-3); animation-duration: 29s; opacity: calc(var(--blob-opacity) * .7); }
+.bg span:nth-child(2) { width: 34vmax; height: 34vmax; right: -8vmax; top: 18vh; background: var(--blob-2); animation-duration: 32s; }
+.bg span:nth-child(3) { width: 30vmax; height: 30vmax; left: 20vw; bottom: -14vmax; background: var(--blob-3); animation-duration: 29s; }
 .bg span:nth-child(4) { width: 28vmax; height: 28vmax; right: 10vw; bottom: -10vmax; background: var(--blob-4); animation-duration: 35s; }
 @keyframes flutuar {
   from { transform: translate3d(0, 0, 0) scale(1); }
@@ -299,8 +311,94 @@ dialog.modal::backdrop { background: rgba(10, 14, 16, .45); -webkit-backdrop-fil
 .rodape { text-align: center; padding: var(--sp-6) var(--sp-4); color: var(--ink-muted); font-size: var(--fs-small); }
 .rodape img { height: 18px; margin: 0 auto var(--sp-2); opacity: .9; }
 
-.fade-in { animation: entrar 320ms var(--ease) both; }
-@keyframes entrar { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+/* ---------------------------------------------------------------- combo Liquid Glass
+   1) entrada com zoom suave + desfoque  2) mola (cubic-bezier) com leve escala no hover
+   3) varredura de luz no hover          4) filtro gooey no fundo (ver .bg .gotas) */
+:root {
+  --mola: cubic-bezier(.34, 1.56, .64, 1);        /* overshoot de mola para o hover */
+  --mola-entrada: cubic-bezier(.2, 1.2, .35, 1);  /* mola mais contida para a entrada */
+  --dur-mola: 520ms;
+  --dur-entrada: 680ms;
+  --luz: rgba(255, 255, 255, .95);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --luz: rgba(255, 255, 255, .2); } }
+:root[data-theme="dark"] { --luz: rgba(255, 255, 255, .2); }
+
+/* 1) Entrada. Só "backwards": depois de entrar, a animação não segura o transform (o hover continua livre). */
+@keyframes vidro-entrar {
+  from { opacity: 0; transform: scale(.94); filter: blur(12px); }
+  55%  { opacity: 1; }
+  to   { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+.fade-in, .panel, .topbar, .escolha > a, .kpi, .resumo-cat, details.box,
+.lista > li:nth-child(-n+12) > .cand {
+  animation: vidro-entrar var(--dur-entrada) var(--mola-entrada) backwards;
+}
+.panel + .panel { animation-delay: 70ms; }
+.panel + .panel + .panel { animation-delay: 140ms; }
+.escolha > a:nth-child(1) { animation-delay: 120ms; }
+.escolha > a:nth-child(2) { animation-delay: 200ms; }
+.kpis > :nth-child(2) { animation-delay: 50ms; }
+.kpis > :nth-child(3) { animation-delay: 100ms; }
+.kpis > :nth-child(4) { animation-delay: 150ms; }
+.kpis > :nth-child(5) { animation-delay: 200ms; }
+.kpis > :nth-child(n+6) { animation-delay: 250ms; }
+.resumo-cat, details.box { animation-delay: 120ms; }
+.lista > li:nth-child(1) > .cand { animation-delay: 140ms; }
+.lista > li:nth-child(2) > .cand { animation-delay: 170ms; }
+.lista > li:nth-child(3) > .cand { animation-delay: 200ms; }
+.lista > li:nth-child(4) > .cand { animation-delay: 230ms; }
+.lista > li:nth-child(5) > .cand { animation-delay: 260ms; }
+.lista > li:nth-child(6) > .cand { animation-delay: 290ms; }
+.lista > li:nth-child(7) > .cand { animation-delay: 320ms; }
+.lista > li:nth-child(8) > .cand { animation-delay: 350ms; }
+.lista > li:nth-child(9) > .cand { animation-delay: 380ms; }
+.lista > li:nth-child(10) > .cand { animation-delay: 410ms; }
+.lista > li:nth-child(11) > .cand { animation-delay: 440ms; }
+.lista > li:nth-child(12) > .cand { animation-delay: 470ms; }
+/* Telas que se redesenham sozinhas (resultado a cada 30 s) não repetem a entrada. */
+.sem-entrada .panel, .sem-entrada .kpi, .sem-entrada .fade-in, .sem-entrada details.box { animation: none; }
+
+/* 2) Mola com leve escala */
+.btn, .cand, .escolha > a, .kpi, .resumo-cat {
+  transition:
+    transform var(--dur-mola) var(--mola),
+    box-shadow var(--dur) var(--ease), filter var(--dur) var(--ease),
+    border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.btn:hover:not(:disabled) { transform: scale(1.035); }
+.btn:active:not(:disabled) { transform: scale(.97); transition-duration: 120ms; }
+.cand:hover:not(:disabled) { transform: scale(1.025); }
+.escolha > a:hover, .kpi:hover, .resumo-cat:hover { transform: scale(1.02); box-shadow: var(--glass-spec), var(--shadow-float); }
+
+/* 3) Varredura de luz: faixa diagonal que atravessa o card uma vez a cada hover */
+.btn, .cand, .escolha > a, .kpi, .resumo-cat { position: relative; overflow: hidden; isolation: isolate; }
+.btn::after, .cand::after, .escolha > a::after, .kpi::after, .resumo-cat::after {
+  content: ""; position: absolute; top: -25%; bottom: -25%; left: 0; width: 45%;
+  pointer-events: none; z-index: 2; opacity: 0;
+  background: linear-gradient(100deg,
+    transparent 0%,
+    color-mix(in srgb, var(--accent) 16%, transparent) 30%,
+    var(--luz) 50%,
+    color-mix(in srgb, var(--accent) 16%, transparent) 70%,
+    transparent 100%);
+  transform: translateX(-170%) skewX(-18deg);
+}
+@media (hover: hover) {
+  .btn:hover:not(:disabled)::after, .cand:hover:not(:disabled)::after,
+  .escolha > a:hover::after, .kpi:hover::after, .resumo-cat:hover::after {
+    animation: varrer-luz 900ms cubic-bezier(.4, 0, .2, 1);
+  }
+}
+@keyframes varrer-luz {
+  0%   { transform: translateX(-170%) skewX(-18deg); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateX(330%) skewX(-18deg); opacity: 0; }
+}
+
+/* Filtro SVG oculto (definido no HTML) */
+.filtros-svg { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 /* ---------------------------------------------------------------- acessibilidade e fallbacks */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -317,7 +415,8 @@ dialog.modal::backdrop { background: rgba(10, 14, 16, .45); -webkit-backdrop-fil
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
-  .btn:hover:not(:disabled), .cand:hover:not(:disabled) { transform: none; }
+  .btn:hover:not(:disabled), .cand:hover:not(:disabled),
+  .escolha > a:hover, .kpi:hover, .resumo-cat:hover { transform: none; }
 }
 @media (prefers-contrast: more) {
   :root { --glass-border: var(--ink); --border: var(--ink); --border-strong: var(--ink); }
@@ -325,11 +424,14 @@ dialog.modal::backdrop { background: rgba(10, 14, 16, .45); -webkit-backdrop-fil
     background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none;
   }
   .glass::before, .bg span { display: none; }
+  .btn::after, .cand::after, .escolha > a::after, .kpi::after, .resumo-cat::after { display: none; }
   .cand { border-width: 2px; }
 }
-/* Mobile de entrada: menos camadas de blur e blobs mais leves */
+/* Mobile de entrada: menos camadas de blur, blobs mais leves e sem o filtro SVG (custo de GPU) */
 @media (max-width: 600px) {
+  .bg .gotas { filter: none; }
   .bg span { filter: blur(40px); animation: none; }
+  .lista > li > .cand { animation: none; }
   .stepper, .barra-acoes { -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%); }
 }
 

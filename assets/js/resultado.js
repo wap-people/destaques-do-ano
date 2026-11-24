@@ -1,6 +1,6 @@
 // Painel de apuração (comissão). Polling de 30 s, sem Realtime.
-import { criarCliente, rpc, h, $, limpar, icone, toast, fmtDataHora, fmtData, fmtNum, nomeBonito, baixarArquivo, csv, carregando, EMPRESAS } from './comum.js?v=20261123c';
-import { exigirLogin, botaoSair } from './auth.js?v=20261123c';
+import { criarCliente, rpc, h, $, limpar, icone, toast, fmtDataHora, fmtData, fmtNum, nomeBonito, baixarArquivo, csv, carregando, EMPRESAS } from './comum.js?v=20261124a';
+import { exigirLogin, botaoSair } from './auth.js?v=20261124a';
 
 const app = $('#app');
 const cliente = criarCliente({ comLogin: true });
@@ -157,7 +157,10 @@ async function atualizar() {
   try { dados = await rpc(cliente, 'apurar', { p_empresa: empresa }); render(); }
   catch (e) { toast('Não foi possível atualizar: ' + e.message, 5000); }
 }
-function iniciarPolling() { pararPolling(); timer = setInterval(() => { if (!document.hidden) atualizar(); }, INTERVALO); }
+function iniciarPolling() {
+  // A entrada animada toca só na primeira carga; as atualizações de 30 s não piscam a tela.
+  setTimeout(() => app.classList.add('sem-entrada'), 1500);
+  pararPolling(); timer = setInterval(() => { if (!document.hidden) atualizar(); }, INTERVALO); }
 function pararPolling() { if (timer) clearInterval(timer); timer = null; }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && timer) atualizar(); });
 

@@ -12,11 +12,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
   <link rel="stylesheet" href="assets/css/tokens.css">
-  <link rel="stylesheet" href="assets/css/app.css">
-  <link rel="stylesheet" href="assets/css/escolha.css">
+  <link rel="stylesheet" href="assets/css/app.css?v=20261124a">
+  <link rel="stylesheet" href="assets/css/escolha.css?v=20261124a">
 </head>
 <body>
-  <div class="bg" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+  <div class="bg" aria-hidden="true"><div class="gotas"><span></span><span></span><span></span><span></span></div></div>
+  <svg class="filtros-svg" aria-hidden="true" focusable="false">
+    <filter id="gooey" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="26" result="desfoque"/>
+
+      <feColorMatrix in="desfoque" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8"/>
+    </filter>
+  </svg>
   <main class="wrap">
     <section class="glass panel">
       <h1>Destaques do Ano 2026</h1>
