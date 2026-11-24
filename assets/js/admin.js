@@ -1,9 +1,9 @@
 // Página de administração: importação, configuração, abertura/encerramento.
 import {
   criarCliente, rpc, h, $, limpar, icone, toast, confirmar, carregando,
-  fmtDataHora, fmtNum, nomeBonito, chave, soDigitos, EMPRESAS,
-} from './comum.js?v=20261124a';
-import { exigirLogin, botaoSair } from './auth.js?v=20261124a';
+  fmtDataHora, fmtNum, nomeBonito, chave, soDigitos, EMPRESAS, abasLiquidas,
+} from './comum.js?v=20261124b';
+import { exigirLogin, botaoSair } from './auth.js?v=20261124b';
 
 const app = $('#app');
 const cliente = criarCliente({ comLogin: true });
@@ -17,7 +17,7 @@ const rpcE = (nome, args = {}) => rpc(cliente, nome, { p_empresa: empresa, ...ar
 
 function seletorEmpresa() {
   const status = Object.fromEntries((painel?.empresas || []).map((e) => [e.codigo, e]));
-  return h('div', { class: 'tabs glass seletor-empresa', role: 'tablist', 'aria-label': 'Empresa' },
+  return abasLiquidas(h('div', { class: 'tabs glass seletor-empresa', role: 'tablist', 'aria-label': 'Empresa' },
     ...EMPRESAS.map((e) => h('button', {
       role: 'tab', type: 'button', 'aria-selected': e.codigo === empresa ? 'true' : 'false',
       onclick: async () => {
@@ -26,7 +26,7 @@ function seletorEmpresa() {
         try { sessionStorage.setItem('destaques-admin-empresa', empresa); } catch { /* nada */ }
         await recarregar();
       },
-    }, e.nome, status[e.codigo] ? h('span', { class: 'muted small' }, ` · ${ROTULO_STATUS[status[e.codigo].status]}`) : null)));
+    }, e.nome, status[e.codigo] ? h('span', { class: 'muted small' }, ` · ${ROTULO_STATUS[status[e.codigo].status]}`) : null))));
 }
 
 const CAMPOS_ATIVOS = [
@@ -341,9 +341,12 @@ function render() {
     ['config', 'Configuração', abaConfig],
     ['historico', 'Histórico', abaHistorico],
   ];
-  const conteudo = h('div', { class: 'fade-in' });
-  const nav = h('div', { class: 'tabs glass', role: 'tablist', 'aria-label': 'Seções' },
-    ...abas.map(([id, rot]) => h('button', { role: 'tab', type: 'button', 'aria-selected': id === abaAtual ? 'true' : 'false', onclick: () => { abaAtual = id; render(); } }, rot)));
+  // Sem animação no invólucro: opacity/filter num ancestral desligam o backdrop-filter dos painéis
+  // de vidro até a animação acabar, e o fundo "troca" de nitidez ~1 s depois do clique.
+  // Os painéis de dentro já têm a própria entrada.
+  const conteudo = h('div', {});
+  const nav = abasLiquidas(h('div', { class: 'tabs glass', role: 'tablist', 'aria-label': 'Seções' },
+    ...abas.map(([id, rot]) => h('button', { role: 'tab', type: 'button', 'aria-selected': id === abaAtual ? 'true' : 'false', onclick: () => { abaAtual = id; render(); } }, rot))));
   conteudo.append(abas.find(([id]) => id === abaAtual)[2]());
   limpar(app).append(seletorEmpresa(), nav, conteudo);
 }

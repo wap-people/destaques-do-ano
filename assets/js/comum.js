@@ -1,5 +1,5 @@
 // Utilitários compartilhados pelas três páginas.
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=20261124a';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js?v=20261124b';
 
 export function criarCliente({ comLogin = false } = {}) {
   if (!window.supabase) throw new Error('Biblioteca do Supabase não carregou.');
@@ -191,3 +191,59 @@ export function csv(linhas) {
 export const CORES_CATEGORIA = ['var(--cat-1)', 'var(--cat-2)', 'var(--cat-3)', 'var(--cat-4)', 'var(--cat-5)'];
 
 export const EMPRESAS = [{ codigo: 'WAP', nome: 'WAP' }, { codigo: 'FRESO', nome: 'Freso' }];
+
+// ------------------------------------------------------------------ movimento Liquid Glass
+// Liquid Morph: um único indicador desliza até a aba ativa (só transform + width de um elemento).
+// As telas são recriadas a cada clique, então a última posição fica guardada por lista
+// (aria-label): o indicador nasce onde estava e escorrega até a aba nova.
+const posicaoAbas = new Map();
+export function abasLiquidas(lista, seletor = '[aria-selected="true"], [aria-current="step"]') {
+  const ind = h('span', { class: 'tab-ind', 'aria-hidden': 'true' });
+  const chaveLista = lista.getAttribute('aria-label') || '';
+  lista.classList.add('abas-liquidas');
+  lista.prepend(ind);
+  const medir = () => { const b = lista.querySelector(seletor); return b ? { x: b.offsetLeft, w: b.offsetWidth } : null; };
+  const pousar = (p) => { ind.style.transform = `translateX(${p.x}px)`; ind.style.width = `${p.w}px`; };
+  // Microtask: roda logo depois de a tela ser montada (mesmo tick), antes do próximo quadro.
+  // Se a lista ainda não estiver na página, tenta de novo no quadro seguinte.
+  let tentativas = 0;
+  const iniciar = () => {
+    if (!lista.isConnected) { if (++tentativas < 30) requestAnimationFrame(iniciar); return; }
+    const novo = medir();
+    if (!novo) return;
+    const antigo = posicaoAbas.get(chaveLista);
+    ind.classList.add('parado');
+    pousar(antigo || novo);
+    void ind.offsetWidth;            // fixa a posição de partida antes de ligar a transição
+    ind.classList.remove('parado');
+    ind.classList.add('pronto');
+    pousar(novo);
+    posicaoAbas.set(chaveLista, novo);
+    // Rótulos que mudam de largura (ex.: status carregado) reposicionam o indicador.
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(() => { const p = lista.isConnected && medir(); if (p) { pousar(p); posicaoAbas.set(chaveLista, p); } }).observe(lista);
+    }
+  };
+  queueMicrotask(iniciar);
+  return lista;
+}
+
+// Bubble Reveal (saída): o elemento some por opacidade e só depois sai do DOM.
+// A entrada (inflar + desfoque) é só CSS, com @starting-style.
+export function sairBolha(el) {
+  if (!el || !el.isConnected) return;
+  el.classList.add('bolha-saindo');
+  const fim = () => el.remove();
+  el.addEventListener('transitionend', fim, { once: true });
+  setTimeout(fim, 400);
+}
+
+// Scroll Float: ao rolar, <html data-rolou> aprofunda sombra e desfoque das barras flutuantes.
+// IntersectionObserver em vez de ouvir 'scroll': só dispara ao cruzar o limite, nada por quadro.
+(function profundidadeAoRolar(limite = 24) {
+  if (!('IntersectionObserver' in window) || !document.body) return;
+  const s = h('div', { class: 'sentinela-rolagem', 'aria-hidden': 'true' });
+  s.style.height = `${limite}px`;
+  document.body.prepend(s);
+  new IntersectionObserver(([e]) => { document.documentElement.toggleAttribute('data-rolou', !e.isIntersecting); }).observe(s);
+})();

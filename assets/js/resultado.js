@@ -1,6 +1,6 @@
 // Painel de apuração (comissão). Polling de 30 s, sem Realtime.
-import { criarCliente, rpc, h, $, limpar, icone, toast, fmtDataHora, fmtData, fmtNum, nomeBonito, baixarArquivo, csv, carregando, EMPRESAS } from './comum.js?v=20261124a';
-import { exigirLogin, botaoSair } from './auth.js?v=20261124a';
+import { criarCliente, rpc, h, $, limpar, icone, toast, fmtDataHora, fmtData, fmtNum, nomeBonito, baixarArquivo, csv, carregando, EMPRESAS, abasLiquidas } from './comum.js?v=20261124b';
+import { exigirLogin, botaoSair } from './auth.js?v=20261124b';
 
 const app = $('#app');
 const cliente = criarCliente({ comLogin: true });
@@ -13,7 +13,7 @@ let empresa = (() => { try { return sessionStorage.getItem('destaques-admin-empr
 const nomeEmpresa = () => (EMPRESAS.find((e) => e.codigo === empresa) || {}).nome || empresa;
 
 function seletorEmpresa() {
-  return h('div', { class: 'tabs glass no-print', role: 'tablist', 'aria-label': 'Empresa' },
+  return abasLiquidas(h('div', { class: 'tabs glass no-print', role: 'tablist', 'aria-label': 'Empresa' },
     ...EMPRESAS.map((e) => h('button', {
       role: 'tab', type: 'button', 'aria-selected': e.codigo === empresa ? 'true' : 'false',
       onclick: async () => {
@@ -22,7 +22,7 @@ function seletorEmpresa() {
         try { sessionStorage.setItem('destaques-admin-empresa', empresa); } catch { /* nada */ }
         await atualizar();
       },
-    }, e.nome)));
+    }, e.nome))));
 }
 
 function kpi(rot, valor, sub) {

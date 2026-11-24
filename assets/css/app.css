@@ -37,16 +37,17 @@ a { color: var(--accent); }
     radial-gradient(900px 700px at 110% 110%, color-mix(in srgb, var(--blob-4) 16%, transparent), transparent 60%),
     var(--bg-base);
 }
-/* Gotas: o container recebe o filtro SVG "gooey" (#gooey, oculto em cada página), que funde as
-   bordas das manchas e dá a distorção orgânica. Fica só no fundo: em cima do conteúdo o filtro
-   borraria o texto e anularia o backdrop-filter do vidro. */
-.bg .gotas { position: absolute; inset: 0; opacity: var(--blob-opacity); filter: url(#gooey) blur(10px); }
+/* Gotas: cada mancha tem o próprio desfoque CSS. Não use filtro SVG (url(#...)) aqui: o Chrome o
+   desenha por software e, quando o conteúdo muda (clique, animação de entrada), refaz o fundo com
+   nitidez diferente, e a troca fica visível. O .bg fica isolado para não ser repintado junto. */
+.bg { contain: strict; isolation: isolate; }
+.bg .gotas { position: absolute; inset: 0; opacity: var(--blob-opacity); }
 .bg span {
-  position: absolute; border-radius: 50%;
+  position: absolute; border-radius: 50%; filter: blur(14px); will-change: transform;
   animation: flutuar 26s var(--ease) infinite alternate, deformar 17s ease-in-out infinite alternate;
 }
 .bg span:nth-child(even) { animation-direction: alternate, alternate-reverse; }
-/* Forma orgânica que respira; com o gooey, as bordas se fundem como líquido. */
+/* Forma orgânica que respira. */
 @keyframes deformar {
   0%   { border-radius: 50%; }
   33%  { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; }
@@ -313,7 +314,7 @@ dialog.modal::backdrop { background: rgba(10, 14, 16, .45); -webkit-backdrop-fil
 
 /* ---------------------------------------------------------------- combo Liquid Glass
    1) entrada com zoom suave + desfoque  2) mola (cubic-bezier) com leve escala no hover
-   3) varredura de luz no hover          4) filtro gooey no fundo (ver .bg .gotas) */
+   3) varredura de luz no hover          4) gotas do fundo que respiram (ver .bg .gotas) */
 :root {
   --mola: cubic-bezier(.34, 1.56, .64, 1);        /* overshoot de mola para o hover */
   --mola-entrada: cubic-bezier(.2, 1.2, .35, 1);  /* mola mais contida para a entrada */
@@ -397,8 +398,53 @@ dialog.modal::backdrop { background: rgba(10, 14, 16, .45); -webkit-backdrop-fil
   100% { transform: translateX(330%) skewX(-18deg); opacity: 0; }
 }
 
-/* Filtro SVG oculto (definido no HTML) */
-.filtros-svg { position: absolute; width: 0; height: 0; overflow: hidden; }
+/* ---------------------------------------------------------------- movimento Liquid Glass
+   5) Liquid Morph  6) Bubble Reveal  7) Scroll Float
+   Tudo em transform/opacity/width de poucos elementos; filtros só em transições curtas. */
+:root {
+  --mola-liquida: cubic-bezier(.55, 1.45, .4, .92);  /* posição: arrasta e passa um pouco do ponto */
+  --mola-viscosa: cubic-bezier(.3, 1.25, .5, 1);     /* largura: chega antes, a borda "escorre" */
+}
+
+/* 5) Liquid Morph: indicador único (criado por abasLiquidas() em comum.js) */
+.abas-liquidas > .tab-ind {
+  position: absolute; top: 6px; bottom: 6px; left: 0; width: 0; z-index: 0;
+  border-radius: var(--radius-pill); background: var(--accent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), var(--shadow-float);
+  opacity: 0; pointer-events: none; will-change: transform;
+  transition: transform 640ms var(--mola-liquida), width 480ms var(--mola-viscosa), opacity 200ms var(--ease);
+}
+.abas-liquidas > .tab-ind.pronto { opacity: 1; }
+.abas-liquidas > .tab-ind.parado { transition: none; }
+.abas-liquidas > button { position: relative; z-index: 1; transition: color 320ms var(--ease); }
+.tabs.abas-liquidas button[aria-selected="true"],
+.stepper.abas-liquidas button[aria-current="step"] { background: transparent; }
+
+/* 6) Bubble Reveal: botões entram inflando (escala com mola + desfoque que some) e saem por opacidade.
+   @starting-style vale para botão recém-inserido; navegador sem suporte só mostra sem animar. */
+.btn {
+  transition:
+    opacity 260ms var(--ease), transform var(--dur-mola) var(--mola), filter 420ms var(--ease),
+    box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+@starting-style {
+  .btn { opacity: 0; transform: scale(.55); filter: blur(8px); }
+  /* telas que se redesenham sozinhas (resultado a cada 30 s) não repetem a entrada */
+  .sem-entrada .btn { opacity: 1; transform: none; filter: none; }
+}
+.btn.bolha-saindo { opacity: 0; pointer-events: none; transition-duration: 220ms; }
+
+/* 7) Scroll Float: barras flutuantes ganham profundidade depois que a página rola (html[data-rolou]) */
+.sentinela-rolagem { position: absolute; top: 0; left: 0; width: 1px; pointer-events: none; visibility: hidden; }
+.stepper, .barra-acoes {
+  transition: box-shadow 450ms var(--ease), background-color 450ms var(--ease),
+    -webkit-backdrop-filter 450ms var(--ease), backdrop-filter 450ms var(--ease);
+}
+:root[data-rolou] .stepper, :root[data-rolou] .barra-acoes {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(32px) saturate(200%); backdrop-filter: blur(32px) saturate(200%);
+  box-shadow: var(--glass-spec), 0 24px 48px -16px rgba(0, 0, 0, .38), 0 6px 16px -6px rgba(0, 0, 0, .18);
+}
 
 /* ---------------------------------------------------------------- acessibilidade e fallbacks */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -409,6 +455,7 @@ dialog.modal::backdrop { background: rgba(10, 14, 16, .45); -webkit-backdrop-fil
   .glass, .btn-ghost, dialog.modal, .toast {
     background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none;
   }
+  :root[data-rolou] .stepper, :root[data-rolou] .barra-acoes { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
   .glass::before { display: none; }
   .lista, .resumo-cat, .kpi, details.box { background: var(--surface-alt); }
   .bg span { display: none; }
@@ -423,16 +470,18 @@ dialog.modal::backdrop { background: rgba(10, 14, 16, .45); -webkit-backdrop-fil
   .glass, .btn-ghost, dialog.modal, .toast, .lista, .resumo-cat, .kpi {
     background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none;
   }
+  :root[data-rolou] .stepper, :root[data-rolou] .barra-acoes { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .abas-liquidas > .tab-ind { box-shadow: none; outline: 2px solid var(--ink); }
   .glass::before, .bg span { display: none; }
   .btn::after, .cand::after, .escolha > a::after, .kpi::after, .resumo-cat::after { display: none; }
   .cand { border-width: 2px; }
 }
-/* Mobile de entrada: menos camadas de blur, blobs mais leves e sem o filtro SVG (custo de GPU) */
+/* Mobile de entrada: menos camadas de blur e blobs parados (custo de GPU) */
 @media (max-width: 600px) {
-  .bg .gotas { filter: none; }
   .bg span { filter: blur(40px); animation: none; }
   .lista > li > .cand { animation: none; }
   .stepper, .barra-acoes { -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%); }
+  :root[data-rolou] .stepper, :root[data-rolou] .barra-acoes { -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); }
 }
 
 /* ---------------------------------------------------------------- impressão (ata) */

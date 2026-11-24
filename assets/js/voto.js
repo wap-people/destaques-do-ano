@@ -2,8 +2,8 @@
 import {
   criarCliente, rpc, h, $, limpar, icone, toast, confirmar, carregando,
   cpfValido, mascaraCpf, mascaraData, dataBrParaIso, soDigitos,
-  fmtDataHora, nomeBonito, iniciais, chave, CORES_CATEGORIA,
-} from './comum.js?v=20261124a';
+  fmtDataHora, nomeBonito, iniciais, chave, CORES_CATEGORIA, abasLiquidas, sairBolha,
+} from './comum.js?v=20261124b';
 
 const REGRAS = 'A votação é exclusiva para colaboradores efetivos admitidos até 30/11/2026. ' +
   'Colaboradores temporários ou terceiros não podem participar. Cada colaborador pode escolher até três pessoas ' +
@@ -158,12 +158,12 @@ function telaIdentificacao(msgErro) {
 // ------------------------------------------------------------------ 3. Cédula
 function stepper() {
   const total = ced.categorias.length;
-  return h('nav', { class: 'stepper glass', 'aria-label': 'Etapas da votação' },
+  return abasLiquidas(h('nav', { class: 'stepper glass', 'aria-label': 'Etapas da votação' },
     ...ced.categorias.map((c, i) => h('button', {
       type: 'button', 'aria-current': i === passo ? 'step' : null,
       onclick: () => { passo = i; salvarEstado(); telaCategoria(); },
     }, c.nome, h('span', { class: 'n', 'aria-label': `${escolhas[c.codigo].length} escolhidos` }, escolhas[c.codigo].length))),
-    h('button', { type: 'button', 'aria-current': passo === total ? 'step' : null, onclick: () => { passo = total; salvarEstado(); telaRevisao(); } }, 'Revisão'));
+    h('button', { type: 'button', 'aria-current': passo === total ? 'step' : null, onclick: () => { passo = total; salvarEstado(); telaRevisao(); } }, 'Revisão')));
 }
 
 function verificarExpiracao() {
@@ -334,7 +334,7 @@ async function enviar(btn, erro) {
     }
     if (r && (r.codigo === 'recusado' || r.codigo === 'fechada')) limparEstado();
     erro.append(h('div', { class: 'alert alert-erro' }, (r && r.mensagem) || 'Não foi possível registrar o voto.'));
-    if (!ced) btn.remove();
+    if (!ced) sairBolha(btn);
   } catch (e) {
     // Falha de rede: o voto pode ou não ter sido gravado. Não reenvia sozinho.
     erro.append(h('div', { class: 'alert alert-erro' }, e.message,

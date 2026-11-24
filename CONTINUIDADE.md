@@ -119,7 +119,7 @@ O pacote de continuidade (enviado à parte, fora do git) traz três arquivos:
 Os nomes com `.local.` e a pasta `.claude/` são ignorados pelo git de propósito.
 
 ### Publicar uma alteração no front
-1. Mudou JS ou CSS? Troque a versão `?v=AAAAMMDDx` em **todos** os lugares: os imports de `assets/js/*.js`, o `<script type="module">` e os `<link>` de CSS de cada HTML. O valor é o mesmo em todos. A versão atual é `20261124a`.
+1. Mudou JS ou CSS? Troque a versão `?v=AAAAMMDDx` em **todos** os lugares: os imports de `assets/js/*.js`, o `<script type="module">` e os `<link>` de CSS de cada HTML. O valor é o mesmo em todos. A versão atual é `20261124b`.
 2. Faça commit e push na `main`. O Pages publica em cerca de 1 minuto.
 3. Confira o site publicado (a versão nova deve carregar) nos temas claro e escuro e no celular.
 
@@ -129,7 +129,8 @@ Os nomes com `.local.` e a pasta `.claude/` são ignorados pelo git de propósit
 - O Supabase tem **pg_safeupdate**: todo `UPDATE` e `DELETE` precisa de `WHERE`.
 - `interno.votacao_aberta(empresa)` exige status `aberta` **e** a hora atual dentro do período. Só abrir não basta se o período não tiver começado.
 - Na tabela `pessoas`, as colunas de situação são `ativo` e `elegivel`; a data em `importacoes` é `feito_em`.
-- O filtro SVG `#gooey` e as animações de fundo ficam desligados abaixo de 600 px, por desempenho.
+- As animações das gotas do fundo ficam desligadas abaixo de 600 px, por desempenho. Não use filtro SVG (`url(#...)`) no fundo: o Chrome o redesenha por software e a nitidez muda depois de cliques.
+- Não anime `opacity` ou `filter` num elemento que **contém** painéis `.glass`: enquanto a animação roda, o `backdrop-filter` dos painéis para de desfocar o fundo e "volta" de uma vez no fim (era a troca de nitidez ~1 s após o clique no admin). Anime o próprio painel.
 
 ### Mudanças no banco
 - Toda alteração entra como **nova migration** em `supabase/migrations/` (`AAAAMMDDHHMMSS_nome.sql`). Nunca edite uma migration já aplicada.
