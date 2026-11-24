@@ -1,18 +1,20 @@
-# Destaques do Ano 2026 · WAP
+# Destaques do Ano 2026
 
-Sistema de votação anônima do Time Legendário: site estático no **GitHub Pages** e backend no **Supabase Free**.
+Sistema de votação anônima do grupo (WAP e Freso): site estático no **GitHub Pages** e backend no **Supabase Free**.
 
 Atende **duas empresas do grupo: WAP e Freso**. A votação é separada (página, marca, base, HiPo,
 status e apuração próprios); admins e telas de apuração são unificados, com seletor de empresa.
 
 | Página | Acesso | Para quê |
 |---|---|---|
-| `index.html` | público | votação **WAP** (DS "WAP Group") |
+| `index.html` | público | página neutra de escolha (sem JS), aponta para `/wap/` e `/freso/` |
+| `wap/index.html` | público | votação **WAP** (DS "WAP Group") |
 | `freso/index.html` | público | votação **Freso** (azul #1F39F9, cereja #C00033, Poppins) |
 | `resultado.html` | login (comissão) | apuração ao vivo por empresa (polling 30 s), CSV e ata |
 | `admin.html` | login (admins) | por empresa: importar planilhas, configurar, abrir/encerrar |
 
-Endereços: `https://wap-people.github.io/votacao-destaques-wap/` (WAP) e `.../freso/` (Freso).
+Endereços: `https://wap-people.github.io/destaques-do-ano/wap/` (WAP) e `.../freso/` (Freso).
+Repositório `wap-people/destaques-do-ano` (renomeado de `votacao-destaques-wap` em 24/11/2026).
 Projetos Supabase: produção `votacao-destaques-prod` e homologação `votacao-destaques-homolog`
 (o `assets/js/config.js` aponta para a produção; a homologação está comentada no mesmo arquivo).
 
@@ -65,7 +67,7 @@ A regra "quem pode receber voto de quem" está num único lugar: `interno.candid
 ## Estrutura
 
 ```
-index.html · resultado.html · admin.html
+index.html (escolha) · wap/index.html · freso/index.html · resultado.html · admin.html
 assets/css/tokens.css   tokens do DS "WAP Group" (cores do símbolo, cinzas, Inter)
 assets/css/app.css      Liquid Glass + fallbacks (transparência, movimento, contraste, sem backdrop-filter)
 assets/js/              comum, voto, auth, admin, resultado, config

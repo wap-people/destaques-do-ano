@@ -1,44 +1,49 @@
 <!doctype html>
-<html lang="pt-BR" data-empresa="WAP" data-selo="Time Legendário">
+<html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#0094a1">
-  <title>Destaques do Ano 2026 · WAP</title>
-  <meta name="description" content="Votação Destaques do Ano 2026 do Time Legendário WAP.">
-  <link rel="icon" href="assets/img/simbolo-barras.svg" type="image/svg+xml">
+  <title>Destaques do Ano 2026</title>
+  <meta name="description" content="Votação Destaques do Ano 2026: escolha a sua empresa.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
   <link rel="stylesheet" href="assets/css/tokens.css">
   <link rel="stylesheet" href="assets/css/app.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"
-          integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o"
-          crossorigin="anonymous" defer></script>
-  <script type="module" src="assets/js/voto.js?v=20261123c"></script>
+  <style>
+    .escolha { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--sp-4); margin-top: var(--sp-5); }
+    .escolha a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-3);
+                 min-height: 160px; padding: var(--sp-5); text-decoration: none; color: inherit; border-radius: var(--raio-lg, 20px);
+                 transition: transform .15s ease; }
+    .escolha a:hover { transform: scale(1.02); }
+    .escolha a:focus-visible { outline: 3px solid var(--accent, #0094a1); outline-offset: 3px; }
+    .escolha img { max-width: 170px; height: auto; }
+    .escolha span { font-weight: 600; }
+    @media (prefers-reduced-motion: reduce) { .escolha a { transition: none; } .escolha a:hover { transform: none; } }
+  </style>
 </head>
 <body>
   <div class="bg" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-
-  <header class="topbar glass">
-    <img class="logo logo-light" src="assets/img/wap-waaw-positivo.svg" alt="WAP WAAW" width="146" height="30">
-    <img class="logo logo-dark" src="assets/img/wap-waaw-negativo.svg" alt="WAP WAAW" width="146" height="30">
-    <span class="badge" id="status-badge" hidden></span>
-  </header>
-
-  <main class="wrap" id="app" aria-live="polite">
-    <section class="glass panel" id="carregando">
-      <p class="muted">Carregando…</p>
+  <main class="wrap">
+    <section class="glass panel">
+      <h1>Destaques do Ano 2026</h1>
+      <p class="muted">Escolha a sua empresa para votar.</p>
+      <nav class="escolha" aria-label="Empresas">
+        <a class="glass" href="wap/">
+          <img class="logo-light" src="assets/img/wap-waaw-positivo.svg" alt="" width="170" height="35">
+          <img class="logo-dark" src="assets/img/wap-waaw-negativo.svg" alt="" width="170" height="35">
+          <span>Votar na WAP</span>
+        </a>
+        <a class="glass" href="freso/">
+          <img class="logo-light" src="assets/img/freso-azul.png" alt="" width="170" height="43">
+          <img class="logo-dark" src="assets/img/freso-negativo.png" alt="" width="170" height="43">
+          <span>Votar na Freso</span>
+        </a>
+      </nav>
     </section>
   </main>
-
-  <footer class="rodape">
-    <img src="assets/img/simbolo-barras.svg" alt="" width="34" height="18">
-    Dane-se a média, somos legendários.
-  </footer>
-  <noscript><p class="wrap">Ative o JavaScript para votar.</p></noscript>
 </body>
 </html>

@@ -2,10 +2,13 @@
 
 Guia para o RH e a comissão. O sistema atende **WAP e Freso**, com votações separadas.
 
-- Votação **WAP**: `https://wap-people.github.io/votacao-destaques-wap/`
-- Votação **Freso**: `https://wap-people.github.io/votacao-destaques-wap/freso/`
-- Resultado (comissão, as duas empresas): `https://wap-people.github.io/votacao-destaques-wap/resultado.html`
-- Administração (as duas empresas): `https://wap-people.github.io/votacao-destaques-wap/admin.html`
+- Votação **WAP**: `https://wap-people.github.io/destaques-do-ano/wap/`
+- Votação **Freso**: `https://wap-people.github.io/destaques-do-ano/freso/`
+- Página de escolha (neutra, aponta para as duas): `https://wap-people.github.io/destaques-do-ano/`
+- Resultado (comissão, as duas empresas): `https://wap-people.github.io/destaques-do-ano/resultado.html`
+- Administração (as duas empresas): `https://wap-people.github.io/destaques-do-ano/admin.html`
+
+> Divulgue para cada empresa **só o link dela** (`/wap/` ou `/freso/`).
 
 > No admin e no resultado, escolha a empresa no seletor **WAP | Freso** no topo. Tudo o que você fizer
 > (importar, abrir, encerrar, zerar, anonimizar) vale **só para a empresa selecionada**.
